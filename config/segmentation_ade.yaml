@@ -1,0 +1,263 @@
+# Semantic Segmentation Configuration for ADE20K Dataset
+# ADE20K has 150 classes 
+
+
+###
+# Base SegFormer segmentation configuration (no filtering) for ADE20K
+###
+segformer_base:
+  experiment:
+    project: soft-equivariance-segmentation-ade20k
+    run_name: segformer_ade20k_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data/ADEChallengeData2016
+    dataset: ade20k
+    batch_size: 32
+    num_workers: 10
+    image_size: 512
+    augmentation: true
+    val_split: 0.0  # ADE20K has official train/val split, so no need to split training
+    eval_rot: 30.0 
+
+  model:
+    type: "filtered_segformer"
+    pretrained_model: "nvidia/segformer-b0-finetuned-ade-512-512"
+    num_labels: 150
+    group_type: "rotation"
+    n_rotations: 4
+    soft_thresholding: 0.0
+    decomposition_method: "schur"
+    preserve_norm: false
+    freeze_filters: false
+    min_filter_size: 1
+
+  train:
+    epochs: 50
+    lr: 1e-4
+    backbone_lr: 0.0
+    weight_decay: 0.01  
+    warmup_steps: 500  
+    max_grad_norm: 1.0  
+    scheduler:
+      type: CosineAnnealingLR
+      eta_min: 1e-7
+
+
+  logging:
+    use_wandb: true
+    log_interval: 50
+    wandb_dir: './logs/ade20k'
+    checkpoint_dir: "./logs/log_depot"
+
+###
+# SegFormer with filtered Conv2d layers 
+###
+segformer_filtered:
+  inherit_from: segformer_base
+  experiment:
+    run_name: segformer_filtered_ade20k
+  model:
+    
+    n_rotations: 4
+    soft_thresholding: 0.0
+    decomposition_method: "schur"
+
+
+segformer_c18:
+  inherit_from: segformer_filtered
+  experiment:
+    run_name: segformer_c18_ade20k
+  data:
+    eval_rot: 30.0
+  model:
+    n_rotations: 18  
+
+
+
+vit_seg:
+  inherit_from: segformer_base
+  experiment:
+    run_name: vit_seg_ade20k
+  data:
+    image_size: 224
+    batch_size: 180
+  model:
+    type: "filtered_vit_seg"
+    pretrained_model: "google/vit-base-patch16-224"
+    num_labels: 150
+    filter_patch_embeddings: true
+    filter_attention_qkv: true
+    filter_attention_output: false
+    filter_mlp: true
+    group_type: "rotation"
+    n_rotations: 4
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+    freeze_patch_embeddings: false
+    freeze_position_embeddings: false
+  train:
+    epochs: 50
+    lr: 6e-5
+    backbone_lr: 0.0
+    weight_decay: 0.05  
+
+
+vit_seg_c18:
+  inherit_from: vit_seg
+  experiment:
+    run_name: vit_seg_c18_ade20k
+  data:
+    eval_rot: 30.0
+  model:
+    n_rotations: 18
+
+## dino segmentation
+dinov2_seg:
+  inherit_from: segformer_base
+  experiment:
+    run_name: dinov2_seg_ade20k
+  data:
+    image_size: 512
+  model:
+    type: "filtered_dino2_seg"
+    pretrained_model: "facebook/dinov2-base"
+    num_labels: 150
+    filter_patch_embeddings: true
+    filter_attention_qkv: true
+    group_type: "rotation"
+    n_rotations: 4
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+    decomposition_method: "svd"
+    freeze_patch_embeddings: false
+    freeze_position_embeddings: false
+  train:
+    epochs: 50  
+    lr: 6e-5  
+    backbone_lr: 0.0
+    weight_decay: 0.01
+    scheduler:
+      eta_min: 1e-6
+
+
+dinov2_seg_c18:
+  inherit_from: dinov2_seg
+  experiment:
+    run_name: dinov2_seg_c18_ade20k
+  data:
+    eval_rot: 30.0
+  model:
+    n_rotations: 18
+
+
+
+###
+# Canonicalization Baseline Configurations for Segmentation
+###
+
+# ViT Segmentation with Canonicalization
+vit_seg_canon:
+  inherit_from: vit_seg
+  experiment:
+    run_name: vit_seg_canonicalization_ade20k
+  model:
+    type: "filtered_vit_seg_canon" 
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+
+# ViT Segmentation with Canonicalization (C18)
+vit_seg_canon_c18:
+  inherit_from: vit_seg_canon
+  experiment:
+    run_name: vit_seg_canon_c18_ade20k
+  data:
+    eval_rot: 30.0
+    image_size: 224
+    batch_size: 128
+  model:
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+# SegFormer with Canonicalization
+segformer_canon:
+  inherit_from: segformer_filtered
+  experiment:
+    run_name: segformer_canonicalization_ade20k
+  model:
+    type: "filtered_segformer_canon"  
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+# SegFormer with Canonicalization (C18)
+segformer_canon_c18:
+  inherit_from: segformer_canon
+  experiment:
+    run_name: segformer_canon_c18_ade20k
+  data:
+    eval_rot: 30.0
+    batch_size: 20
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+# DINOv2 Segmentation with Canonicalization
+dinov2_seg_canon:
+  inherit_from: dinov2_seg
+  experiment:
+    run_name: dinov2_seg_canonicalization_ade20k
+  model:
+    type: "filtered_dinov2_seg_canon"  
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+dinov2_seg_canon_c18:
+  inherit_from: dinov2_seg_canon
+  experiment:
+    run_name: dinov2_seg_canon_c18_ade20k
+  data:
+    eval_rot: 30.0
+    batch_size: 20
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"

@@ -1,0 +1,202 @@
+# Filtered ViT Configuration for Classification CIFAR-10 and CIFAR-100
+
+###
+# Base ViT configuration
+###
+vit_base:
+  experiment:
+    project:  soft-equivariance-cifar-rebut
+    run_name: vit_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data
+    dataset: cifar10
+    batch_size: 128
+    num_workers: 6
+    image_size: 224
+    augmentation: true
+    eval_rot: 30.0
+    topk_accuracy: 5
+
+  model:
+    type: "filtered_vit"
+    pretrained_model: "facebook/deit-small-patch16-224"
+    num_labels: 10
+    filter_patch_embeddings: true
+    filter_attention_qkv: false
+    filter_attention_output: false
+    filter_mlp: false
+    group_type: "rotation"
+    n_rotations: 4
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+    attention_output_filter_list: none
+    soft_thresholding_attention_output: 0.6
+    decomposition_method: "schur"
+    hard_mask: false
+    preserve_norm: false
+    freeze_patch_embeddings: false
+    freeze_position_embeddings: false
+
+
+  train:
+    epochs: 30
+    lr: 1e-4
+    backbone_lr: null
+    weight_decay: 0.0
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 30
+
+  logging:
+    use_wandb: true
+    log_interval: 50
+    checkpoint_dir: "./logs"
+    wandb_dir: './logs/classification'
+
+# smooth activation outputs
+cifar10_vit_outputsmooth:
+  inherit_from: vit_base
+  experiment:
+    run_name: cifar10_vit_outputsmooth
+  model:
+    filter_attention_output: true
+    attention_output_filter_list: [0, 5, 10]
+    soft_thresholding_attention_output: 0.5
+
+###
+# CIFAR100 ViT configuration
+###
+cifar100_vit:
+  inherit_from: vit_base
+  experiment:
+    run_name: cifar100_vit
+  data:
+    dataset: cifar100
+  model:  
+    num_labels: 100
+  train:
+    lr: 1e-4
+    backbone_lr: null  # Set to 0 for linear probing
+
+cifar100_vit_output_smooth:
+  inherit_from: cifar100_vit
+  experiment:
+    run_name: cifar100_vit_outputsmooth
+  model:
+    filter_attention_output: true
+    attention_output_filter_list: [0, 5, 10]
+    soft_thresholding_attention_output: 0.5
+
+### High rotation
+cifar10_vit_c18:
+  inherit_from: vit_base
+  experiment:
+    run_name: cifar10_vit_c18
+  model:
+    n_rotations: 18
+  data:
+    eval_rot: 30.0
+
+cifar100_vit_c18:
+  inherit_from: cifar100_vit
+  model:
+    n_rotations: 18
+  data:
+    eval_rot: 30.0
+
+cifar10_vit_c18_output_smooth:
+  inherit_from: cifar10_vit_c18
+  model:
+    filter_attention_output: true
+    attention_output_filter_list: [0, 5, 10]
+    soft_thresholding_attention_output: 0.8
+
+cifar100_vit_c18_output_smooth:
+  inherit_from: cifar100_vit_c18
+  model:
+    filter_attention_output: true
+    attention_output_filter_list: [0, 5, 10]
+    soft_thresholding_attention_output: 0.8
+
+
+
+# CIFAR-10 ViT with Canonicalization
+cifar10_vit_canon:
+  inherit_from: vit_base
+  experiment:
+    run_name: cifar10_vit_canonicalization
+  model:
+    type: "filtered_vit_canon"  
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+# CIFAR-100 ViT with Canonicalization
+cifar100_vit_canon:
+  inherit_from: cifar100_vit
+  experiment:
+    run_name: cifar100_vit_canonicalization
+  model:
+    type: "filtered_vit_canon" 
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+# CIFAR-10 ViT with Canonicalization 
+cifar10_vit_canon_c18:
+  inherit_from: cifar10_vit_canon
+  experiment:
+    run_name: cifar10_vit_canon_c18
+  data:
+    eval_rot: 30.0
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+cifar10_vit_canon_c8:
+  inherit_from: cifar10_vit_canon_c18
+  model:
+    canonicalization:
+      n_rotations: 8
+      group_type: "rotation"
+
+
+# CIFAR-100 ViT with Canonicalization
+cifar100_vit_canon_c18:
+  inherit_from: cifar100_vit_canon
+  experiment:
+    run_name: cifar100_vit_canon_c18
+  data:
+    eval_rot: 30.0
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+cifar100_vit_canon_c8:
+  inherit_from: cifar100_vit_canon_c18
+  model:
+    canonicalization:
+      n_rotations: 8
+      group_type: "rotation"
+

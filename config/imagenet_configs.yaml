@@ -1,0 +1,294 @@
+# Configurations for ImageNet-1k classification experiments with ViT and ResNet backbones, including soft equivariance and canonicalization baselines.
+
+imagenet1k_vit:
+  experiment:
+    project: soft-equivariance-imagenet-rebut
+    run_name: imagenet1k_vit
+    seed: 42
+    device: auto
+
+  data:
+    root: /datasets/imagenet/
+    dataset: imagenet
+    image_size: 224
+    augmentation: true
+    eval_rot: 30 
+    
+    # Data augmentation (can override via CLI)
+    mixup: 0.8
+    cutmix: 1.0
+    reprob: 0.25
+    label_smoothing: 0.1
+    auto_augment: "rand-m9-mstd0.5-inc1"
+
+  model:
+    type: "filtered_vit"
+    pretrained_model: "google/vit-base-patch16-224"
+    num_labels: 1000
+    filter_patch_embeddings: true
+    filter_attention_qkv: false
+    filter_attention_output: false
+    filter_mlp: false
+    n_rotations: 4
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 0.8
+    decomposition_method: "schur"
+    preserve_norm: false
+    freeze_patch_embeddings: false
+    freeze_position_embeddings: false
+
+  train:
+    optimizer: "adamw"
+    epochs: 15
+    lr: 1e-4
+    weight_decay: 0.05
+    warmup_epochs: 4
+    warmup_lr: 1e-6
+    opt_betas: [0.9, 0.999]
+    opt_eps: 1e-8
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 10
+      eta_min: 1e-6  # Minimum LR
+
+  logging:
+    use_wandb: true
+    log_interval: 50
+    checkpoint_dir: "./logs"
+
+imagenet1k_vit_c18:
+  inherit_from: imagenet1k_vit
+  experiment:
+    run_name: imagenet1k_vit_c18
+  data:
+    eval_rot: 30
+  model:
+    n_rotations: 18  
+
+###
+# canonicalization baseline
+###
+imagenet1k_vit_canon:
+  inherit_from: imagenet1k_vit
+  experiment:
+    run_name: imagenet1k_vit_canon
+  model:
+    type: "filtered_vit_canon"
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [8, 8]
+      out_channels: 1
+      group_type: "rotation"
+  train:
+    model_ema: false
+
+imagenet1k_vit_canon_c18:
+  inherit_from: imagenet1k_vit_canon
+  experiment:
+    run_name: imagenet1k_vit_canon_c18
+  data:
+    eval_rot: 30
+  model:
+    n_rotations: 18
+    canonicalization:
+      n_rotations: 18  
+      group_type: "rotation"
+  train:
+    model_ema: false
+
+
+###
+# DINOv2 Configurations
+###
+
+imagenet1k_dinov2:
+  inherit_from: imagenet1k_vit
+  experiment:
+    project: soft-equivariance-imagenet_rebut
+    run_name: imagenet1k_dinov2
+  model:
+    type: "filtered_dinov2"
+    pretrained_model: "facebook/dinov2-base-imagenet1k-1-layer"
+  train:
+    optimizer: "adamw"
+    epochs: 15         
+    lr: 2e-5           
+    weight_decay: 0.04 
+    warmup_epochs: 4   
+    warmup_lr: 1e-6
+    opt_betas: [0.9, 0.999]
+    opt_eps: 1e-8
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 10        
+      eta_min: 1e-6
+
+imagenet1k_dinov2_c18:
+  inherit_from: imagenet1k_dinov2
+  experiment:
+    run_name: imagenet1k_dinov2_c18
+  data:
+    eval_rot: 30
+  model:
+    n_rotations: 18  
+
+### dinnov2 with register tokens
+imagenet1k_dinov2_reg:
+  inherit_from: imagenet1k_dinov2
+  experiment:
+    run_name: imagenet1k_dinov2_reg
+  model:
+    pretrained_model: "facebook/dinov2-with-registers-base-imagenet1k-1-layer" 
+  
+imagenet1k_dinov2_reg_c18:
+  inherit_from: imagenet1k_dinov2_reg
+  experiment:
+    run_name: imagenet1k_dinov2_reg_c18
+  data:
+    eval_rot: 30
+  model:
+    n_rotations: 18  
+
+
+###
+# dinov2 canonicalization baseline
+###
+imagenet1k_dinov2_canon:
+  inherit_from: imagenet1k_dinov2
+  experiment:
+    run_name: imagenet1k_dinov2_canon
+  model:
+    type: "filtered_dinov2_canon"
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [8, 8]
+      out_channels: 1
+      group_type: "rotation"
+  train:
+    model_ema: false
+
+
+imagenet1k_dinov2_canon_c18:
+  inherit_from: imagenet1k_dinov2_canon
+  experiment:
+    run_name: imagenet1k_dinov2_canon_c18
+  data:
+    eval_rot: 30
+  model:
+    n_rotations: 18
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+  train:
+    model_ema: false
+  
+imagenet1k_dinov2_reg_canon:
+  inherit_from: imagenet1k_dinov2_canon
+  experiment:
+    run_name: imagenet1k_dinov2_reg_canon
+  model:
+    pretrained_model: "facebook/dinov2-with-registers-base-imagenet1k-1-layer"
+
+imagenet1k_dinov2_reg_canon_c18:
+  inherit_from: imagenet1k_dinov2_canon_c18
+  experiment:
+    run_name: imagenet1k_dinov2_reg_canon_c18
+  model:
+    pretrained_model: "facebook/dinov2-with-registers-base-imagenet1k-1-layer"
+
+
+
+# --------------------------------------------------
+# ResNet-50 ImageNet-1k Configurations
+# --------------------------------------------------
+resnet_base:
+  experiment:
+    project: soft-equivariance-imagenet-rebut
+    run_name: imagenet1k_resnet
+    seed: 42
+    device: auto
+  data:
+    root: /datasets/imagenet/ 
+    dataset: imagenet
+    image_size: 224
+    augmentation: true
+    eval_rot: 30
+    topk_accuracy: 5
+  model:
+    type: "filtered_resnet"
+    pretrained_model: "microsoft/resnet-50"
+    num_labels: 1000
+    n_rotations: 4
+    soft_thresholding: 1.0
+    decomposition_method: "schur"
+    preserve_norm: false
+    freeze_filters: false
+    min_filter_size: 1
+  train:
+    optimizer: "adamw"
+    epochs: 15
+    lr: 1e-4
+    weight_decay: 0.05
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 10
+      eta_min: 1e-6
+  logging:
+    use_wandb: true
+    log_interval: 50
+    checkpoint_dir: "./logs"
+
+imagenet1k_resnet:
+  inherit_from: resnet_base
+  experiment:
+    run_name: imagenet1k_resnet
+
+imagenet1k_resnet_c18:
+  inherit_from: resnet_base
+  experiment:
+    run_name: imagenet1k_resnet_c18
+  model:
+    n_rotations: 18
+    soft_thresholding: 0.0
+  data:
+    eval_rot: 30
+
+# Canonicalization baseline
+imagenet1k_resnet_canon:
+  inherit_from: resnet_base
+  experiment:
+    run_name: imagenet1k_resnet_canon
+  model:
+    type: "filtered_resnet_canon"
+    soft_thresholding: 1.0
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+  train:
+    model_ema: false
+
+imagenet1k_resnet_canon_c18:
+  inherit_from: imagenet1k_resnet_canon
+  experiment:
+    run_name: imagenet1k_resnet_canon_c18
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+  data:
+    eval_rot: 30

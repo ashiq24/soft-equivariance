@@ -1,0 +1,93 @@
+# Configuration for O(5)-equivariant MLP training on synthetic data
+base_o5:
+  experiment:
+    name: o5_equivariant_mlp
+    project: soft-equivariance_misc_v2
+    seed: 42
+
+  data:
+    # Input/output dimensions
+    dataset: synthetic_o5
+    in_features: 2
+    out_features: 1
+    
+    # Dataset sizes
+    n_train: 1000
+    n_val: 1000
+    n_test: 1000
+
+    num_workers: 4
+    noise_level: 0.0
+    seed: 42
+
+  model:
+    type: filtered_o5
+    group: O(5)
+    
+    in_features: 2
+    out_features: 1
+
+    in_rep: V 
+    out_rep: S
+    soft_thresholding: 1.0
+    hard_mask: false
+    use_invariant_filter: true
+    hidden_features: [128, 128, 128]
+    standardize: true
+    hard: false
+
+  training:
+    epochs: 500
+    batch_size: 300
+    learning_rate: 0.001
+    weight_decay: 0.000001
+    aug_eval_every: 50
+    # Learning rate scheduler
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 500
+      eta_min: 0.00005
+      
+    
+    checkpoint_dir: logs/misc_o5
+
+  logging:
+    use_wandb: true
+    log_interval: 50
+    checkpoint_dir: "./logs/misc_o5"
+    wandb_dir: './logs/misc_o5/wandb'
+    wandb_project: soft-equivariance
+    wandb_entity: null
+
+emlp_o5:
+  inherit_from: base_o5
+  training:
+    epochs: 500
+    batch_size: 500
+    learning_rate: 0.01
+    weight_decay: 0.0
+    scheduler:
+      type: StepLR
+      step_size: 100
+      gamma: 0.1 
+  model:
+    use_original_emlp: true
+    use_linear: false
+    use_non_eq: false
+    type: emlp_o5
+    hidden_features: [256, 256, 256]
+    standardize: true
+    use_rpp: false
+    rpp_factor: 0.0
+  
+mlp_o5:
+  inherit_from: emlp_o5
+  model:
+    use_non_eq: true
+    hidden_features: [512, 512, 512]
+
+rpp_emlp_o5:
+  inherit_from: emlp_o5
+  model:
+    use_rpp: true
+    rpp_factor: 0.5

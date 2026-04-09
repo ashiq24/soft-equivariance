@@ -1,0 +1,184 @@
+# Filtered ResNet Configuration for Classification CIFAR-10 and CIFAR-100
+
+###
+# Base ResNet configuration
+###
+resnet_base:
+  experiment:
+    project:  soft-equivariance-cifar-rebut
+    run_name: resnet_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data
+    dataset: cifar10
+    batch_size: 128
+    num_workers: 6
+    image_size: 224
+    augmentation: true
+    eval_rot: 30.0
+    topk_accuracy: 5
+
+  model:
+    type: "filtered_resnet"
+    pretrained_model: "microsoft/resnet-50"
+    num_labels: 10
+    group_type: "rotation"
+    n_rotations: 4
+    soft_thresholding: 0.0
+    decomposition_method: "schur"
+    hard_mask: false
+    preserve_norm: false
+
+  train:
+    epochs: 30
+    lr: 1e-4
+    backbone_lr: null
+    weight_decay: 0.0
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 30
+
+  logging:
+    use_wandb: true
+    log_interval: 50
+    checkpoint_dir: "./logs"
+    wandb_dir: './logs/classification'
+
+###
+# CIFAR-10 ResNet experiments
+###
+cifar10_resnet:
+  inherit_from: resnet_base
+  experiment:
+    run_name: cifar10_resnet
+
+cifar10_resnet_soft05:
+  inherit_from: resnet_base
+  experiment:
+    run_name: cifar10_resnet_soft05
+  model:
+    soft_thresholding: 0.5
+
+cifar10_resnet_soft08:
+  inherit_from: resnet_base
+  experiment:
+    run_name: cifar10_resnet_soft08
+  model:
+    soft_thresholding: 0.8
+
+###
+# CIFAR-100 ResNet experiments
+###
+cifar100_resnet:
+  inherit_from: resnet_base
+  experiment:
+    run_name: cifar100_resnet
+  data:
+    dataset: cifar100
+  model:
+    num_labels: 100
+
+cifar100_resnet_soft05:
+  inherit_from: cifar100_resnet
+  experiment:
+    run_name: cifar100_resnet_soft05
+  model:
+    soft_thresholding: 0.5
+
+cifar100_resnet_soft08:
+  inherit_from: cifar100_resnet
+  experiment:
+    run_name: cifar100_resnet_soft08
+  model:
+    soft_thresholding: 0.8
+
+
+cifar10_resnet_c18:
+  inherit_from: resnet_base
+  experiment:
+    run_name: cifar10_resnet_c18
+  model:
+    n_rotations: 18
+    soft_thresholding: 0.5
+  data:
+    eval_rot: 30.0
+
+cifar100_resnet_c18:
+  inherit_from: cifar100_resnet
+  experiment:
+    run_name: cifar100_resnet_c18
+  model:
+    n_rotations: 18
+    soft_thresholding: 0.5
+  data:
+    eval_rot: 30.0
+
+###
+# Canonicalization baselines
+###
+cifar10_resnet_canon:
+  inherit_from: resnet_base
+  experiment:
+    run_name: cifar10_resnet_canonicalization
+  model:
+    type: "filtered_resnet_canon"
+    soft_thresholding: 1.0 
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+cifar100_resnet_canon:
+  inherit_from: cifar100_resnet
+  experiment:
+    run_name: cifar100_resnet_canonicalization
+  model:
+    type: "filtered_resnet_canon"
+    soft_thresholding: 1.0
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+
+cifar10_resnet_canon_c18:
+  inherit_from: cifar10_resnet_canon
+  experiment:
+    run_name: cifar10_resnet_canon_c18
+  data:
+    eval_rot: 30.0
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+cifar10_resnet_canon_c8:
+  inherit_from: cifar10_resnet_canon_c18
+  model:
+    canonicalization:
+      n_rotations: 8
+      group_type: "rotation"
+
+cifar100_resnet_canon_c18:
+  inherit_from: cifar100_resnet_canon
+  experiment:
+    run_name: cifar100_resnet_canon_c18
+  data:
+    eval_rot: 30.0
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+cifar100_resnet_canon_c8:
+  inherit_from: cifar100_resnet_canon_c18
+  model:
+    canonicalization:
+      n_rotations: 8
+      group_type: "rotation"

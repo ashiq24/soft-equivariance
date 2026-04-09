@@ -1,0 +1,303 @@
+# Semantic Segmentation Configuration for ViT, DINOv2, and SegFormer on PASCAL VOC 2012 dataset
+
+
+###
+# Base SegFormer 
+###
+segformer_base:
+  experiment:
+    project: soft-equivariance-pascal_voc_freeze
+    run_name: segformer_pascal_voc_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data
+    dataset: pascal_voc
+    batch_size: 32  
+    num_workers: 24
+    image_size: 512
+    augmentation: true
+    val_split: 0.1  # 10% of training data for validation
+    eval_rot: 30.0 
+
+  model:
+    type: "filtered_segformer"
+    pretrained_model: "nvidia/segformer-b0-finetuned-ade-512-512"
+    num_labels: 21  # PASCAL VOC has 21 classes (20 objects + 1 background)
+    group_type: "rotation"
+    n_rotations: 4
+    soft_thresholding: 0.0
+    decomposition_method: "schur"
+    preserve_norm: false
+    joint_decomposition: false
+    freeze_filters: false
+    min_filter_size: 1
+
+  train:
+    epochs: 100
+    lr: 1e-4  
+    backbone_lr: 0.0
+    weight_decay: 0.01  
+    warmup_steps: 250  
+    max_grad_norm: 1.0 
+    use_invariant_loss: false
+    inv_loss_weight: 0.0
+    inv_loss_freq: 1
+    scheduler:
+      type: CosineAnnealingLR
+      eta_min: 1e-7
+
+
+  logging:
+    use_wandb: true
+    log_interval: 20
+    checkpoint_dir: "./logs/log_depot"
+    wandb_dir: './logs/segmentation'
+
+###
+# SegFormer with filtered Conv2d layers 
+###
+segformer_filtered:
+  inherit_from: segformer_base
+  experiment:
+    run_name: segformer_filtered_pascal_voc
+  model:
+    n_rotations: 4
+    soft_thresholding: 0.0
+    decomposition_method: "schur"
+
+segformer_c18:
+  inherit_from: segformer_filtered
+  experiment:
+    run_name: segformer_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+  model:
+    n_rotations: 18  
+
+
+
+vit_seg:
+  inherit_from: segformer_base
+  experiment:
+    run_name: vit_seg_pascal_voc
+  data:
+    image_size: 224
+  model:
+    type: "filtered_vit_seg"
+    pretrained_model: "google/vit-base-patch16-224"
+    filter_patch_embeddings: true
+    filter_attention_qkv: true
+    filter_attention_output: false
+    filter_mlp: true
+    group_type: "rotation"
+    batch_size: 32
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+    freeze_patch_embeddings: false
+    freeze_position_embeddings: false
+  train:
+    epochs: 100  
+    lr: 6e-5  
+    backbone_lr: 0.0
+    weight_decay: 0.05 
+    num_labels: 21
+
+vit_seg_c18:
+  inherit_from: vit_seg
+  experiment:
+    run_name: vit_seg_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+  model:
+    n_rotations: 18
+
+
+dinov2_seg:
+  inherit_from: segformer_base
+  experiment:
+    run_name: dinov2_seg_pascal_voc
+  data:
+    image_size: 512
+  model:
+    type: "filtered_dino2_seg"
+    pretrained_model: "facebook/dinov2-base"
+    num_labels: 21
+    filter_patch_embeddings: true
+    filter_attention_qkv: true
+    group_type: "rotation"
+    n_rotations: 4
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+    decomposition_method: "svd"
+    freeze_patch_embeddings: false
+    freeze_position_embeddings: false
+  train:
+    epochs: 100  
+    lr: 6e-5  
+    backbone_lr: 0.0
+    weight_decay: 0.01
+    scheduler:
+      eta_min: 1e-6
+
+
+dinov2_seg_reg:
+  inherit_from: dinov2_seg
+  experiment:
+    run_name: dinov2_seg_reg_pascal_voc
+  model:
+    pretrained_model: "facebook/dinov2-with-registers-base"
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+
+dinov2_seg_c18:
+  inherit_from: dinov2_seg
+  experiment:
+    run_name: dinov2_seg_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+  model:
+    n_rotations: 18
+
+dinov2_seg_reg_c18:
+  inherit_from: dinov2_seg_reg
+  experiment:
+    run_name: dinov2_seg_reg_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+  model:
+    n_rotations: 18
+
+
+
+###
+# Canonicalization Baseline Configurations for Segmentation
+###
+
+
+vit_seg_canon:
+  inherit_from: vit_seg
+  experiment:
+    run_name: vit_seg_canonicalization_pascal_voc
+  model:
+    type: "filtered_vit_seg_canon"  
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+vit_seg_canon_c18:
+  inherit_from: vit_seg_canon
+  experiment:
+    run_name: vit_seg_canon_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+    image_size: 224
+  model:
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+segformer_canon:
+  inherit_from: segformer_filtered
+  experiment:
+    run_name: segformer_canonicalization_pascal_voc
+  model:
+    type: "filtered_segformer_canon"  
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+segformer_canon_c18:
+  inherit_from: segformer_canon
+  experiment:
+    run_name: segformer_canon_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+dinov2_seg_canon:
+  inherit_from: dinov2_seg
+  experiment:
+    run_name: dinov2_seg_canonicalization_pascal_voc
+  model:
+    type: "filtered_dinov2_seg_canon"  
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+dinov2_seg_canon_c18:
+  inherit_from: dinov2_seg_canon
+  experiment:
+    run_name: dinov2_seg_canon_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"
+
+# dino with registers segmentation with Canonicalization
+dinov2_seg_reg_canon:
+  inherit_from: dinov2_seg_reg
+  experiment:
+    run_name: dinov2_seg_reg_canon_pascal_voc
+  model:
+    type: "filtered_dinov2_seg_canon"  
+    soft_thresholding: 1.0
+    soft_thresholding_pos: 1.0
+    filter_patch_embeddings: false
+    filter_attention_qkv: false
+    filter_attention_output: false
+
+    canonicalization:
+      n_rotations: 4
+      in_channels: 3
+      mid_channels: [16, 16]
+      out_channels: 1
+      group_type: "rotation"
+
+dinov2_seg_reg_canon_c18:
+  inherit_from: dinov2_seg_reg_canon
+  experiment:
+    run_name: dinov2_seg_reg_canon_c18_pascal_voc
+  data:
+    eval_rot: 30.0
+  model:
+    canonicalization:
+      n_rotations: 18
+      group_type: "rotation"

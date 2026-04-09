@@ -1,0 +1,384 @@
+###
+# Autoregressive Transformer Base Configuration
+###
+autoregressive_transformer_base:
+  experiment:
+    project: soft-equivariance-trajectory-v2
+    run_name: transformer_eth_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data/human_trajectory
+    dataset: eth
+    batch_size: 128  
+    num_workers: 4
+    obs_len: 8
+    pred_len: 12
+    skip: 1
+    threshold: 0.002
+    min_ped: 1
+    delim: "\t"
+    eval_rot: 45
+    augment: true
+    augment_angle: 45.0
+
+  model:
+    type: "autoregressive_transformer"
+    obs_len: 8
+    pred_len: 12
+    d_model: 256  # Embedding dimension
+    num_heads: 8  # Must divide d_model evenly
+    num_layers: 8  # Number of transformer layers
+    dim_feedforward: 1024  # FFN hidden dimension (4 * d_model)
+    dropout: 0.1
+    nonlinearity: eq_nonlin
+    n_rotations: -1  # Continuous rotations
+
+  train:
+    epochs: 100
+    lr: 0.0005
+    weight_decay: 1e-5
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 100
+      eta_min: 1e-6
+
+  logging:
+    use_wandb: true
+    log_interval: 10
+    checkpoint_dir: "./logs"
+    wandb_dir: './logs/trajectory'
+
+###
+# Filtered Autoregressive Transformer Base Configuration (Rotation)
+###
+filtered_autoregressive_transformer_base:
+  experiment:
+    project: soft-equivariance-trajectory-v2
+    run_name: filtered_transformer_eth_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data/human_trajectory
+    dataset: eth
+    batch_size: 128  
+    num_workers: 4
+    obs_len: 10
+    pred_len: 10
+    skip: 1
+    threshold: 0.002
+    min_ped: 1
+    delim: "\t"
+    eval_rot: 30
+    augment: true
+    augment_angle: 30.0
+
+  model:
+    type: "filtered_autoregressive_transformer"
+    obs_len: 10
+    pred_len: 10
+    d_model: 128  # Embedding dimension (must be even, represents N pairs of 2D vectors)
+    num_heads: 4  # Must divide d_model evenly
+    num_layers: 4  # Number of transformer layers
+    dim_feedforward: 512  # FFN hidden dimension
+    dropout: 0.1
+    # Group type: "rotation", "reflection", or "roto_reflection"
+    group_type: "rotation"
+    # Equivariance filter parameters
+    n_rotations: -1  # Number of discrete rotations (4=90°, 8=45°, -1=continuous)
+    reflection_axis: "x"  # Axis for reflection ('x' or 'y' for 2D)
+    soft_thresholding: 0.0  
+    soft_thresholding_pos: 0.0
+    apply_soft_mask: true
+    convert_layer_norms: true
+    nonlinearity: eq_nonlin
+    hard: true
+
+  train:
+    epochs: 100
+    lr: 0.0005  
+    weight_decay: 1e-5
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 100
+      eta_min: 1e-6
+
+  logging:
+    use_wandb: true
+    log_interval: 10
+    checkpoint_dir: "./logs"
+    wandb_dir: './logs/trajectory'
+
+###
+# Filtered Autoregressive Transformer with REFLECTION group
+###
+filtered_autoregressive_transformer_reflection_base:
+  experiment:
+    project: soft-equivariance-trajectory-v2
+    run_name: filtered_transformer_reflection_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data/human_trajectory
+    dataset: eth
+    batch_size: 128  
+    num_workers: 4
+    obs_len: 10
+    pred_len: 10
+    skip: 1
+    threshold: 0.002
+    min_ped: 1
+    delim: "\t"
+    eval_rot: 30
+    augment: true
+    augment_angle: 30.0
+
+  model:
+    type: "filtered_autoregressive_transformer"
+    obs_len: 10
+    pred_len: 10
+    d_model: 128
+    num_heads: 4
+    num_layers: 4
+    dim_feedforward: 512
+    dropout: 0.1
+    # Group type: reflection only
+    group_type: "reflection"
+    reflection_axis: "x"  
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+    apply_soft_mask: true
+    convert_layer_norms: true
+    nonlinearity: eq_nonlin
+    hard: true
+
+  train:
+    epochs: 100
+    lr: 0.0005
+    weight_decay: 1e-5
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 100
+      eta_min: 1e-6
+
+  logging:
+    use_wandb: true
+    log_interval: 10
+    checkpoint_dir: "./logs"
+    wandb_dir: './logs/trajectory'
+
+###
+# Filtered Autoregressive Transformer with ROTO-REFLECTION group
+###
+filtered_autoregressive_transformer_roto_reflection_base:
+  experiment:
+    project: soft-equivariance-trajectory-v2
+    run_name: filtered_transformer_roto_reflection_base
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data/human_trajectory
+    dataset: eth
+    batch_size: 128  
+    num_workers: 4
+    obs_len: 10
+    pred_len: 10
+    skip: 1
+    threshold: 0.002
+    min_ped: 1
+    delim: "\t"
+    eval_rot: 30
+    augment: true
+    augment_angle: 30.0
+
+  model:
+    type: "filtered_autoregressive_transformer"
+    obs_len: 10
+    pred_len: 10
+    d_model: 128
+    num_heads: 4
+    num_layers: 4
+    dim_feedforward: 512
+    dropout: 0.1
+    group_type: "roto_reflection"
+    n_rotations: -1  # Continuous rotations
+    reflection_axis: "x"  # Reflection along x-axis
+    soft_thresholding: 0.0
+    soft_thresholding_pos: 0.0
+    apply_soft_mask: true
+    convert_layer_norms: true
+    nonlinearity: eq_nonlin
+    hard: true
+
+  train:
+    epochs: 100
+    lr: 0.0005
+    weight_decay: 1e-5
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 100
+      eta_min: 1e-6
+
+  logging:
+    use_wandb: true
+    log_interval: 10
+    checkpoint_dir: "./logs"
+    wandb_dir: './logs/trajectory'
+
+
+autoregressive_transformer_hotel:
+  inherit_from: autoregressive_transformer_base
+  experiment:
+    run_name: transformer_hotel
+  data:
+    dataset: hotel
+
+
+autoregressive_transformer_eth:
+  inherit_from: autoregressive_transformer_base
+  experiment:
+    run_name: transformer_eth
+  data:
+    dataset: eth
+
+autoregressive_transformer_univ:
+  inherit_from: autoregressive_transformer_base
+  experiment:
+    run_name: transformer_univ
+  data:
+    dataset: univ
+
+
+autoregressive_transformer_zara1:
+  inherit_from: autoregressive_transformer_base
+  experiment:
+    run_name: transformer_zara1
+  data:
+    dataset: zara1
+
+
+autoregressive_transformer_zara2:
+  inherit_from: autoregressive_transformer_base
+  experiment:
+    run_name: transformer_zara2
+  data:
+    dataset: zara2
+
+filtered_autoregressive_transformer_hotel:
+  inherit_from: filtered_autoregressive_transformer_base
+  experiment:
+    run_name: filtered_transformer_hotel
+  data:
+    dataset: hotel
+
+
+filtered_autoregressive_transformer_eth:
+  inherit_from: filtered_autoregressive_transformer_base
+  experiment:
+    run_name: filtered_transformer_eth
+  data:
+    dataset: eth
+
+filtered_autoregressive_transformer_univ:
+  inherit_from: filtered_autoregressive_transformer_base
+  experiment:
+    run_name: filtered_transformer_univ
+  data:
+    dataset: univ
+
+filtered_autoregressive_transformer_zara1:
+  inherit_from: filtered_autoregressive_transformer_base
+  experiment:
+    run_name: filtered_transformer_zara1
+  data:
+    dataset: zara1
+
+filtered_autoregressive_transformer_zara2:
+  inherit_from: filtered_autoregressive_transformer_base
+  experiment:
+    run_name: filtered_transformer_zara2
+  data:
+    dataset: zara2
+
+
+###############################################################################
+# REFLECTION GROUP CONFIGURATIONS
+###############################################################################
+
+filtered_reflection_transformer_eth:
+  inherit_from: filtered_autoregressive_transformer_reflection_base
+  experiment:
+    run_name: filtered_reflection_transformer_eth
+  data:
+    dataset: eth
+
+filtered_reflection_transformer_hotel:
+  inherit_from: filtered_autoregressive_transformer_reflection_base
+  experiment:
+    run_name: filtered_reflection_transformer_hotel
+  data:
+    dataset: hotel
+
+filtered_reflection_transformer_univ:
+  inherit_from: filtered_autoregressive_transformer_reflection_base
+  experiment:
+    run_name: filtered_reflection_transformer_univ
+  data:
+    dataset: univ
+
+filtered_reflection_transformer_zara1:
+  inherit_from: filtered_autoregressive_transformer_reflection_base
+  experiment:
+    run_name: filtered_reflection_transformer_zara1
+  data:
+    dataset: zara1
+
+filtered_reflection_transformer_zara2:
+  inherit_from: filtered_autoregressive_transformer_reflection_base
+  experiment:
+    run_name: filtered_reflection_transformer_zara2
+  data:
+    dataset: zara2
+
+
+###############################################################################
+# ROTO-REFLECTION GROUP CONFIGURATIONS
+###############################################################################
+
+filtered_roto_reflection_transformer_eth:
+  inherit_from: filtered_autoregressive_transformer_roto_reflection_base
+  experiment:
+    run_name: filtered_roto_reflection_transformer_eth
+  data:
+    dataset: eth
+filtered_roto_reflection_transformer_hotel:
+  inherit_from: filtered_autoregressive_transformer_roto_reflection_base
+  experiment:
+    run_name: filtered_roto_reflection_transformer_hotel
+  data:
+    dataset: hotel
+
+filtered_roto_reflection_transformer_univ:
+  inherit_from: filtered_autoregressive_transformer_roto_reflection_base
+  experiment:
+    run_name: filtered_roto_reflection_transformer_univ
+  data:
+    dataset: univ
+
+filtered_roto_reflection_transformer_zara1:
+  inherit_from: filtered_autoregressive_transformer_roto_reflection_base
+  experiment:
+    run_name: filtered_roto_reflection_transformer_zara1
+  data:
+    dataset: zara1
+
+filtered_roto_reflection_transformer_zara2:
+  inherit_from: filtered_autoregressive_transformer_roto_reflection_base
+  experiment:
+    run_name: filtered_roto_reflection_transformer_zara2
+  data:
+    dataset: zara2

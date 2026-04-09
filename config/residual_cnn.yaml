@@ -1,0 +1,45 @@
+##
+# RPP model
+##
+
+residual_cnn_base:
+  experiment:
+    project: soft-equivariance-cifar-rotref
+    run_name: residual_cnn_cifar10
+    seed: 42
+    device: auto
+
+  data:
+    root: ./data
+    dataset: cifar10
+    batch_size: 128
+    num_workers: 8
+    image_size: 224
+    augmentation: true
+    eval_rot: 30.0
+    topk_accuracy: 5
+
+  model:
+    type: "residual_cnn"
+    num_labels: 10
+    num_layers: 6
+    residual_strength: 0.3
+    base_channels: 64
+    n_rotations: 4
+    group_type: "rotation"
+    use_regular_representation: false
+
+  train:
+    epochs: 30
+    lr: 1e-4
+    backbone_lr: null
+    weight_decay: 0.0
+    scheduler:
+      type: CosineAnnealingLR
+      T_max: 30
+
+  logging:
+    use_wandb: true
+    log_interval: 50
+    checkpoint_dir: "./logs"
+    wandb_dir: "./logs/classification"

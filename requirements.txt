@@ -1,0 +1,33 @@
+# Soft Equivariance Dependencies
+
+# Core runtime
+torch==2.8.0
+torchvision
+torchaudio
+numpy==1.26.4
+einops
+transformers
+accelerate
+datasets
+scipy
+scikit-learn==1.7.2
+matplotlib
+pandas
+tqdm
+wandb
+pyyaml
+kornia==0.7.0
+e2cnn==0.2.3
+timm
+
+# Equivariant MLP backend
+# Install from: https://github.com/mfinzi/equivariant-MLP
+# Or use the bundled version in external/equivariant-MLP
+emlp>=1.0.0
+
+# Testing
+pytest
+
+# Optional: JAX for full EMLP functionality
+jax>=0.4.0
+jaxlib>=0.4.0
