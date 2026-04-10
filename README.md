@@ -38,8 +38,8 @@ Core building blocks:
 
 |  |  |
 |---|---|
-| <b>softness = 0.0</b><br/><img src="notebooks/figs/vit_softness_0.0.gif" width="540"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/vit_softness_0.2.gif" width="540"/> |
-| <b>softness = 0.6</b><br/><img src="notebooks/figs/vit_softness_0.6.gif" width="540"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/vit_softness_1.0.gif" width="540"/> |
+| <b>softness = 0.0</b><br/><img src="notebooks/figs/vit_softness_0.0.gif" width="450"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/vit_softness_0.2.gif" width="450"/> |
+| <b>softness = 0.6</b><br/><img src="notebooks/figs/vit_softness_0.6.gif" width="450"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/vit_softness_1.0.gif" width="450"/> |
 
 **Schema**
 
@@ -75,8 +75,8 @@ position_embeddings
 
 | |  |
 |---|---|
-| <b>softness = 0.0</b><br/><img src="notebooks/figs/resnet_softness_0.0.gif" width="540"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/resnet_softness_0.2.gif" width="540"/> |
-| <b>softness = 0.6</b><br/><img src="notebooks/figs/resnet_softness_0.6.gif" width="540"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/resnet_softness_1.0.gif" width="540"/> |
+| <b>softness = 0.0</b><br/><img src="notebooks/figs/resnet_softness_0.0.gif" width="450"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/resnet_softness_0.2.gif" width="450"/> |
+| <b>softness = 0.6</b><br/><img src="notebooks/figs/resnet_softness_0.6.gif" width="450"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/resnet_softness_1.0.gif" width="450"/> |
 
 **Schema**
 
