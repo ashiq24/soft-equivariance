@@ -236,7 +236,6 @@ plan.md
 output/*
 wandb/*
 idea.md
-*.png 
 log.txt
 *.pt
 .cursor/

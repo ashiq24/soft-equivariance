@@ -34,12 +34,12 @@ Core building blocks:
 - Filtered Linear wrapper: `softeq/layers/flinear.py`
 
 <details>
-<summary><b>ViT (patch projection + positional embeddings)</b></summary>
+<summary><b>🔷 ViT (patch projection + positional embeddings) · ℹ︎ details</b></summary>
 
 |  |  |
 |---|---|
-| <b>softness = 0.0</b><br/><img src="notebooks/figs/vit_softness_0.0.gif" width="340"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/vit_softness_0.2.gif" width="340"/> |
-| <b>softness = 0.6</b><br/><img src="notebooks/figs/vit_softness_0.6.gif" width="340"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/vit_softness_1.0.gif" width="340"/> |
+| <b>softness = 0.0</b><br/><img src="notebooks/figs/vit_softness_0.0.gif" width="540"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/vit_softness_0.2.gif" width="540"/> |
+| <b>softness = 0.6</b><br/><img src="notebooks/figs/vit_softness_0.6.gif" width="540"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/vit_softness_1.0.gif" width="540"/> |
 
 **Schema**
 
@@ -71,12 +71,12 @@ position_embeddings
 </details>
 
 <details>
-<summary><b>ResNet (filter all Conv2d kernels &gt; 1×1)</b></summary>
+<summary><b>🔷 ResNet (filter all Conv2d kernels &gt; 1×1) · ℹ︎ details</b></summary>
 
 | |  |
 |---|---|
-| <b>softness = 0.0</b><br/><img src="notebooks/figs/resnet_softness_0.0.gif" width="340"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/resnet_softness_0.2.gif" width="340"/> |
-| <b>softness = 0.6</b><br/><img src="notebooks/figs/resnet_softness_0.6.gif" width="340"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/resnet_softness_1.0.gif" width="340"/> |
+| <b>softness = 0.0</b><br/><img src="notebooks/figs/resnet_softness_0.0.gif" width="540"/> | <b>softness = 0.2</b><br/><img src="notebooks/figs/resnet_softness_0.2.gif" width="540"/> |
+| <b>softness = 0.6</b><br/><img src="notebooks/figs/resnet_softness_0.6.gif" width="540"/> | <b>softness = 1.0</b><br/><img src="notebooks/figs/resnet_softness_1.0.gif" width="540"/> |
 
 **Schema**
 
@@ -100,7 +100,7 @@ ResNet (pretrained)
 </details>
 
 <details>
-<summary><b>O(5) equivariant MLP (scientific / structured data)</b></summary>
+<summary><b>🔷 O(5) equivariant MLP (scientific / structured data) · ℹ︎ details</b></summary>
 
 ![O(5) (last GIF in notebooks/mlp_o5.ipynb)](notebooks/figs/o5_equivariant_err.gif)
 
@@ -135,7 +135,7 @@ Input (representation)
 </details>
 
 <details> -->
-<summary><b>Add your own group (SO(3) example)</b></summary>
+<summary><b>🔷 Add your own group (SO(3) example) · ℹ︎ details</b></summary>
 
 The intended extension pattern is:
 
@@ -176,6 +176,9 @@ If you’re implementing a new group, the quickest path is to copy the structure
 ## Standalone demos and notebooks
 - `standalone/` contains “all-in-one” scripts with inlined dependencies for quick experiments.
 - `notebooks/` contains exploratory notebooks and figures/gifs (saved under `notebooks/figs/`).
+
+## Huggingface Releases
+*Models will be added soon.*
 
 ## Experiments
 Experiments are defined in `config/` and launched from `./scripts/`.
