@@ -173,7 +173,7 @@ If you’re implementing a new group, the quickest path is to copy the structure
 
 </details>
 
-## Standalone demos and notebooks
+## 🔷🔷 Standalone demos and notebooks
 - `standalone/` contains “all-in-one” scripts with inlined dependencies for quick experiments.
 - `notebooks/` contains exploratory notebooks and figures/gifs (saved under `notebooks/figs/`).
 
