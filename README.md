@@ -173,9 +173,17 @@ If you’re implementing a new group, the quickest path is to copy the structure
 
 </details>
 
+
+## 🛠️ Practical Tips
+- For pre-trained models, less aggressive filtering (softness value > 0.7) usually works better.
+- While fine-tuning DINO models on small datasets, we empirically find that they are sensitive to positional embedding filtering. 'soft_thresholding_pos=1.0' is a good starting point.
+- Setting 'hard_mask=True' improves equivariance, especially for transformer based models. 
+
 ## 🔷🔷 Standalone demos and notebooks
 - `standalone/` contains “all-in-one” scripts with inlined dependencies for quick experiments.
 - `notebooks/` contains exploratory notebooks and figures/gifs (saved under `notebooks/figs/`).
+
+
 
 ## Huggingface Releases
 *Models will be added soon.*

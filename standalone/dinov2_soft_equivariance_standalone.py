@@ -413,7 +413,7 @@ def monkeypatch_dinov2embeddings(dinov2embeddings, filter_configs):
         input_size=(1, kernel_size, kernel_size),
         soft_threshold=filter_configs["soft_thresholding"],
         debug=False,
-        hard_mask=filter_configs.get("hard_mask", False),
+        hard_mask=filter_configs.get("hard_mask", True),
         preserve_norm=filter_configs.get("preserve_norm", False),
         joint_decomposition=filter_configs.get("joint_decomposition", True)
     )

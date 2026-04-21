@@ -353,7 +353,7 @@ def convert_cnn_to_filtered(model: nn.Module, filter_config: dict) -> nn.Module:
     n_rotations = filter_config['n_rotations']
     soft_thresholding = filter_config['soft_thresholding']
     group_type = filter_config.get('group_type', 'rotation')
-    hard_mask = filter_config.get('hard_mask', False)
+    hard_mask = filter_config.get('hard_mask', True)
     preserve_norm = filter_config.get('preserve_norm', False)
     joint_decomposition = filter_config.get('joint_decomposition', True)
     min_kernel_size = filter_config.get('min_kernel_size', 2)
