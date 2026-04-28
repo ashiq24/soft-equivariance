@@ -238,5 +238,6 @@ wandb/*
 idea.md
 log.txt
 *.pt
+*.safetensors
 .cursor/
 idea.md
