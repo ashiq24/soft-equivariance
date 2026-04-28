@@ -147,51 +147,47 @@ python hugging_face_releases/package_model.py \
 
 ## Step 3 — Verify: HF model output must match original `.pt` model
 
-**Always run this before uploading.** It loads both models on the same random input and
-checks that outputs are numerically identical (max absolute difference < 1e-4).
+**Always run this before uploading.** The test script uses the same YAML config
+that was used for training (`--config` / `--config_name`), so there is no risk of
+accidentally using wrong architecture parameters. It checks state-dict keys,
+weight values, and forward-pass logits. Max allowed difference is 1e-4.
 
 ```bash
-# ViT classification
+# ViT classification — use the exact config + config_name from training
 python hugging_face_releases/test_release.py \
-    --model_arch  filtered_vit \
+    --config      config/imagenet_configs.yaml \
+    --config_name imagenet1k_vit \
     --checkpoint  path/to/best.pt \
-    --hf_dir      hugging_face_releases/filtered-vit-base-patch16-224-imagenet-c4-s0.0 \
-    --pretrained_model google/vit-base-patch16-224 \
-    --num_labels  1000 \
-    --n_rotations 4 \
-    --soft_thresholding 0.0 \
-    --soft_thresholding_pos 0.0
+    --hf_dir      hugging_face_releases/filtered-vit-base-patch16-224-imagenet-c4-s0.0
 
-# DINOv2 classification
+# DINOv2 classification (C18 config, override softness at test time)
 python hugging_face_releases/test_release.py \
-    --model_arch  filtered_dinov2 \
+    --config      config/imagenet_configs.yaml \
+    --config_name imagenet1k_dinov2_c18 \
+    --soft_thresholding 0.7 \
+    --soft_thresholding_pos 0.7 \
     --checkpoint  path/to/best.pt \
-    --hf_dir      hugging_face_releases/filtered-dinov2-base-imagenet-c4-s0.0 \
-    --pretrained_model facebook/dinov2-base \
-    --num_labels  1000 \
-    --n_rotations 4 \
-    --soft_thresholding 0.0 \
-    --soft_thresholding_pos 0.0
+    --hf_dir      hugging_face_releases/filtered-dinov2-base-imagenet-c4-s0.7
 
-# ViT segmentation
+# ViT segmentation (PASCAL VOC)
 python hugging_face_releases/test_release.py \
-    --model_arch  filtered_vit_seg \
+    --config      config/segmentation.yaml \
+    --config_name vit_pascal_voc \
     --checkpoint  path/to/best.pt \
-    --hf_dir      hugging_face_releases/filtered-vit-base-patch16-224-voc-seg-c4-s0.0 \
-    --pretrained_model google/vit-base-patch16-224 \
-    --num_labels  21 \
-    --n_rotations 4 \
-    --soft_thresholding 0.0
+    --hf_dir      hugging_face_releases/filtered-vit-base-patch16-224-voc-seg-c4-s0.0
 
-# Pass --image to test on a real image instead of random noise:
+# DINOv2 segmentation — test on a real image instead of random noise
 python hugging_face_releases/test_release.py \
-    --model_arch filtered_vit \
-    --checkpoint path/to/best.pt \
-    --hf_dir     hugging_face_releases/filtered-vit-base-patch16-224-imagenet-c4-s0.0 \
-    --pretrained_model google/vit-base-patch16-224 \
-    --num_labels 1000 --n_rotations 4 --soft_thresholding 0.0 \
-    --image path/to/image.jpg
+    --config      config/segmentation.yaml \
+    --config_name dinov2_pascal_voc \
+    --checkpoint  path/to/best.pt \
+    --hf_dir      hugging_face_releases/filtered-dinov2-base-voc-seg-c4-s0.0 \
+    --image       path/to/test_image.jpg
 ```
+
+The `--soft_thresholding`, `--soft_thresholding_pos`, and `--n_rotations` flags
+override the corresponding values from the config, the same way training scripts
+allow overriding them from the command line.
 
 A passing run prints:
 
