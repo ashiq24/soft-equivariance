@@ -9,8 +9,6 @@ einops
 transformers
 accelerate
 datasets
-safetensors
-huggingface_hub
 scipy
 scikit-learn==1.7.2
 matplotlib
@@ -33,3 +31,7 @@ pytest
 # Optional: JAX for full EMLP functionality
 jax>=0.4.0
 jaxlib>=0.4.0
+
+# HuggingFace release
+safetensors
+huggingface_hub

@@ -1,140 +1,110 @@
-#!/usr/bin/env python3
-"""Convert project checkpoints (.pt) to HuggingFace-ready safetensors."""
+"""
+convert_to_safetensors.py
+--------------------------
+Convert a .pt training checkpoint to model.safetensors.
 
-from __future__ import annotations
+Extracts only the model state dict (no optimizer state, no training metadata)
+and writes it as a safetensors file, which is the preferred format for
+HuggingFace model releases.
+
+Supported checkpoint formats
+-----------------------------
+* Segmentation trainer:  checkpoint["model_state_dict"]
+* timm CheckpointSaver:  checkpoint["state_dict"] or checkpoint["model"]
+* Raw state dict:        checkpoint (top-level dict of tensors)
+
+Usage
+-----
+    python convert_to_safetensors.py \
+        --checkpoint path/to/best.pt \
+        --output_dir path/to/output_folder
+
+    # Optionally verify key counts:
+    python convert_to_safetensors.py \
+        --checkpoint best.pt \
+        --output_dir ./out \
+        --print_keys
+"""
 
 import argparse
-import json
-from pathlib import Path
-from typing import Any, Dict
+import os
 
 import torch
-from safetensors.torch import save_file
+from safetensors.torch import save_file, load_file
 
 
-MODEL_ONLY_KEYS = {
-    "type",
-    "pretrained_model",
-    "num_labels",
-    "filter_patch_embeddings",
-    "filter_attention_qkv",
-    "filter_attention_output",
-    "filter_mlp",
-    "group_type",
-    "n_rotations",
-    "soft_thresholding",
-    "soft_thresholding_pos",
-    "decomposition_method",
-    "hard_mask",
-    "preserve_norm",
-    "joint_decomposition",
-    "attention_output_filter_list",
-    "soft_thresholding_attention_output",
-    "ignore_index",
-    "load_pretrained_weight",
-    "freeze_patch_embeddings",
-    "freeze_position_embeddings",
-    "freeze_filters",
-    "min_filter_size",
-}
+def extract_state_dict(checkpoint_path: str) -> dict:
+    """Load a .pt checkpoint and return the model state dict."""
+    print(f"Loading checkpoint: {checkpoint_path}")
+    ckpt = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+
+    if isinstance(ckpt, dict):
+        # Try common key names in order of priority.
+        for key in ("model_state_dict", "state_dict", "model"):
+            if key in ckpt:
+                print(f"  Found state dict under key: \"{key}\"")
+                state_dict = ckpt[key]
+                break
+        else:
+            # Assume the checkpoint IS the state dict (all values are tensors).
+            if all(isinstance(v, torch.Tensor) for v in ckpt.values()):
+                print("  Checkpoint appears to be a raw state dict.")
+                state_dict = ckpt
+            else:
+                available = [k for k in ckpt.keys() if not isinstance(ckpt[k], torch.Tensor)]
+                raise KeyError(
+                    f"Cannot find model weights. Top-level keys: {list(ckpt.keys())}\n"
+                    f"Non-tensor keys: {available}"
+                )
+    else:
+        raise TypeError(f"Expected a dict checkpoint, got {type(ckpt)}")
+
+    # Ensure all values are contiguous float tensors (safetensors requirement).
+    clean = {}
+    for k, v in state_dict.items():
+        if isinstance(v, torch.Tensor):
+            clean[k] = v.contiguous()
+    print(f"  State dict has {len(clean)} parameter/buffer tensors.")
+    return clean
 
 
-AUTO_MAP_BY_TYPE = {
-    "filtered_vit": {
-        "AutoModel": "modeling_filtered_vit.FilteredVitBasePatch16_224",
-        "AutoConfig": "configuration_softeq.SoftEqConfig",
-    },
-    "filtered_dinov2": {
-        "AutoModel": "modeling_filtered_dinov2.FilteredDinov2Base",
-        "AutoConfig": "configuration_softeq.SoftEqConfig",
-    },
-    "filtered_vit_seg": {
-        "AutoModel": "modeling_filtered_vit_seg.FilteredVitBasePatch16_224Seg",
-        "AutoConfig": "configuration_softeq.SoftEqConfig",
-    },
-    "filtered_dino2_seg": {
-        "AutoModel": "modeling_filtered_dinov2_seg.FilteredDinov2BaseSeg",
-        "AutoConfig": "configuration_softeq.SoftEqConfig",
-    },
-}
+def convert(checkpoint_path: str, output_dir: str, print_keys: bool = False):
+    """Convert a .pt checkpoint to model.safetensors in output_dir."""
+    os.makedirs(output_dir, exist_ok=True)
+    state_dict = extract_state_dict(checkpoint_path)
+
+    if print_keys:
+        print("\nState dict keys:")
+        for k in sorted(state_dict.keys()):
+            print(f"  {k:80s}  {tuple(state_dict[k].shape)}")
+
+    out_path = os.path.join(output_dir, "model.safetensors")
+    save_file(state_dict, out_path)
+    size_mb = os.path.getsize(out_path) / (1024 ** 2)
+    print(f"\nSaved: {out_path}  ({size_mb:.1f} MB)")
 
 
-MODEL_TYPE_NAME_BY_TYPE = {
-    "filtered_vit": "filtered-vit-base-patch16-224",
-    "filtered_dinov2": "filtered-dinov2-base",
-    "filtered_vit_seg": "filtered-vit-base-patch16-224-seg",
-    "filtered_dino2_seg": "filtered-dinov2-base-seg",
-}
-
-
-def _extract_model_cfg(checkpoint: Dict[str, Any]) -> Dict[str, Any]:
-    cfg = checkpoint.get("cfg", {})
-    if "model" in cfg:
-        cfg = cfg["model"]
-    model_cfg = {k: v for k, v in cfg.items() if k in MODEL_ONLY_KEYS}
-    if not model_cfg:
-        raise ValueError(
-            "Could not find model config in checkpoint['cfg']. "
-            "Pass --model-config-json to provide the model settings."
-        )
-    return model_cfg
-
-
-def _load_model_cfg_arg(model_config_json: str | None) -> Dict[str, Any]:
-    if not model_config_json:
-        return {}
-    model_cfg = json.loads(model_config_json)
-    return {k: v for k, v in model_cfg.items() if k in MODEL_ONLY_KEYS or k == "type"}
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Convert .pt checkpoint to model.safetensors + config.json")
-    parser.add_argument("--checkpoint", required=True, help="Path to .pt checkpoint")
-    parser.add_argument("--output-dir", required=True, help="Output model directory")
-    parser.add_argument(
-        "--model-config-json",
-        default=None,
-        help="Optional JSON string with model-only config (used if checkpoint lacks cfg/model keys).",
-    )
-    parser.add_argument("--dataset-tag", default=None, help="Optional dataset tag for metadata only.")
-    parser.add_argument("--task", choices=["classification", "segmentation"], default="classification")
-    args = parser.parse_args()
-
-    ckpt_path = Path(args.checkpoint)
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    checkpoint = torch.load(ckpt_path, map_location="cpu", weights_only=False)
-    state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict"))
-    if state_dict is None:
-        raise ValueError("Checkpoint does not contain `model_state_dict` or `state_dict`.")
-
-    model_cfg = _load_model_cfg_arg(args.model_config_json)
-    if not model_cfg:
-        model_cfg = _extract_model_cfg(checkpoint)
-
-    model_kind = model_cfg.get("type")
-    if not model_kind:
-        raise ValueError("Model config must include model `type`.")
-    if model_kind not in AUTO_MAP_BY_TYPE:
-        raise ValueError(f"Unsupported model type `{model_kind}` for HF release conversion.")
-
-    safetensors_path = output_dir / "model.safetensors"
-    save_file(state_dict, str(safetensors_path))
-
-    config = {
-        "model_type": MODEL_TYPE_NAME_BY_TYPE[model_kind],
-        "task": args.task,
-        "dataset_tag": args.dataset_tag,
-        **model_cfg,
-        "auto_map": AUTO_MAP_BY_TYPE[model_kind],
-    }
-    config_path = output_dir / "config.json"
-    config_path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-    print(f"Saved: {safetensors_path}")
-    print(f"Saved: {config_path}")
+def verify(safetensors_path: str):
+    """Quick sanity check: load the safetensors file and print key count."""
+    tensors = load_file(safetensors_path)
+    print(f"Verification: loaded {len(tensors)} tensors from {safetensors_path}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Convert .pt checkpoint to model.safetensors")
+    parser.add_argument("--checkpoint", required=True, help="Path to the .pt checkpoint file")
+    parser.add_argument("--output_dir", required=True, help="Directory to write model.safetensors")
+    parser.add_argument(
+        "--print_keys", action="store_true", default=False,
+        help="Print all state dict keys and shapes",
+    )
+    parser.add_argument(
+        "--verify", action="store_true", default=False,
+        help="Verify the output safetensors file after writing",
+    )
+    args = parser.parse_args()
+
+    convert(args.checkpoint, args.output_dir, args.print_keys)
+
+    if args.verify:
+        verify(os.path.join(args.output_dir, "model.safetensors"))
