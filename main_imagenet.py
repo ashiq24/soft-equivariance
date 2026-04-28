@@ -102,6 +102,8 @@ parser.add_argument('--freeze_filters', action='store_true', default=None,
                     help='Freeze filtered convolution weights (prevents gradient updates)')
 parser.add_argument('--min_filter_size', type=int, default=None,
                     help='Minimum filter size to freeze (only freeze conv with kernel_size >= this value)')
+parser.add_argument('--n_rotations', type=int, default=None,
+                    help='Number of discrete rotations for the equivariant filter group (e.g. 4 for C4, 18 for C18)')
 # softeq ===
 # Dataset parameters
 group = parser.add_argument_group('Dataset parameters')
@@ -480,6 +482,8 @@ def softeq_parse_args(args):
         softeq_cfg['model']['freeze_filters'] = args.freeze_filters
     if args.min_filter_size is not None:
         softeq_cfg['model']['min_filter_size'] = args.min_filter_size
+    if args.n_rotations is not None:
+        softeq_cfg['model']['n_rotations'] = args.n_rotations
     
     
     args.model = softeq_cfg['model']['type']
