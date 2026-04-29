@@ -477,8 +477,10 @@ class SegTrainer:
                 
                 aug_results = test_on_augmented(
                     batch_inputs=images,
+                    batch_targets=masks,
                     model=model_wrapper,
                     task_type='segmentation',
+                    rotation_config=rotation_config,
                     criterion=self.criterion,
                     device=self.device,
                     return_consistency=True,
