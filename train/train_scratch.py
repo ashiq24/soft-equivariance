@@ -149,8 +149,9 @@ class ScratchTrainer:
                 }
                 logger(log_dict)
 
-        epoch_acc = correct / max(total,1)
-        epoch_topk_acc = topk_correct / max(total,1)
+        epoch_loss = running_loss / max(total, 1)
+        epoch_acc = correct / max(total, 1)
+        epoch_topk_acc = topk_correct / max(total, 1)
         return epoch_loss, epoch_acc, epoch_topk_acc
     
     @torch.no_grad()

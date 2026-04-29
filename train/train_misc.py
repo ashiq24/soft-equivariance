@@ -116,9 +116,9 @@ class MiscTrainer:
                     config=config,
                     dir=self.checkpoint_dir,
                 )
-                logger.info("W&B logging initialized")
+                logging.getLogger(__name__).info("W&B logging initialized")
             except ImportError:
-                logger.warning("wandb not installed, disabling W&B logging")
+                logging.getLogger(__name__).warning("wandb not installed, disabling W&B logging")
                 self.use_wandb = False
     
     def train_one_epoch(

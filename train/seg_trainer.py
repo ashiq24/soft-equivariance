@@ -509,6 +509,7 @@ class SegTrainer:
             rot_consistency = rot_consistency_sum / max(rot_consistency_count, 1) if rot_consistency_count > 0 else 0.0
         else:
             rot_loss = 0.0
+            rot_miou = 0.0
             rot_pixel_acc = 0.0
             rot_consistency = 0.0
         
