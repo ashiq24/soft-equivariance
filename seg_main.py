@@ -195,7 +195,8 @@ def main(config_path: Optional[str] = None, run_name: Optional[str] = None,
                 print(f"\nLoading best checkpoint from {best_checkpoint_path}")
                 checkpoint = torch.load(best_checkpoint_path, map_location=device, weights_only=False)
                 model.load_state_dict(checkpoint['model_state_dict'])
-                print(f"✓ Loaded best model with validation mIoU: {checkpoint.get('val_miou', 'unknown'):.4f}")
+                val_miou = checkpoint.get('val_miou', None)
+                print(f"✓ Loaded best model with validation mIoU: {val_miou:.4f}" if val_miou is not None else "✓ Loaded best model (val_miou not in checkpoint)")
 
                 if logger is not None:
                     try:

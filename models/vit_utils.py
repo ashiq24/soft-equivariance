@@ -131,6 +131,8 @@ def get_learning_rates_by_layer(
     
     # Create parameter groups with different learning rates
     param_groups = []
+    if not layer_params:
+        return param_groups
     max_depth = max(layer_params.keys())
     
     for depth in sorted(layer_params.keys()):

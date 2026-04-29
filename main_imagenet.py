@@ -460,7 +460,7 @@ def softeq_parse_args(args):
     if args.experiment != "":
         softeq_cfg['experiment']['run_name'] = args.experiment
     else:
-        args.experiment = softeq_cfg_name + '_' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")[:23]
+        args.experiment = (softeq_cfg_name or "run") + '_' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")[:23]
     # ================= Model Params =========================
     if args.num_classes:
         softeq_cfg['model']['num_labels'] = args.num_classes
@@ -1375,7 +1375,7 @@ def train_one_epoch(
                 local_scale = 1.0
             else:
                 local_scale = (batch_size / args.batch_size)
-                if local_scale == 'sqrt':
+                if args.naflex_loss_scale == 'sqrt':
                     local_scale = local_scale ** 0.5
 
             if args.distributed:
