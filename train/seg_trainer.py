@@ -468,8 +468,10 @@ class SegTrainer:
                         logits = outputs.get('logits')
                     else:
                         logits = outputs
+                    if logits.shape[-2:] != masks.shape[-2:]:
                         logits = F.interpolate(
                             logits,
+                            size=masks.shape[-2:],
                             mode='bilinear',
                             align_corners=False
                         )
