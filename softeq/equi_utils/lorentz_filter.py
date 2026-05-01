@@ -5,7 +5,7 @@ These helpers mirror the O(5) pipeline but build their constraints from
 """
 from .lorentz_constraints_vec import LorentzConstraintsVec
 from .equi_projectors import (
-    EquivariantProjector,
+    EquivariantProjectorviaSchur,
     MultiGeneratorEquivariantProjector,
     MultiGeneratorEquivariantProjectorviaSVD,
 )
@@ -181,7 +181,7 @@ def get_equivariant_filter_lorentz(
     equivariant_projectors = []
     for left_x, sigma_x, _ in decompositions_input:
         for left_y, sigma_y, _ in decompositions_output:
-            projector = EquivariantProjector(
+            projector = EquivariantProjectorviaSchur(
                 left_y,
                 left_x,
                 sigma_y,

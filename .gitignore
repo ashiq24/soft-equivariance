@@ -226,7 +226,7 @@ keys/*
 weights/*
 wandb/*
 
-data/*
+data
 plan.txt
 logs
 logs/*
@@ -234,10 +234,13 @@ logs
 plan.md 
 ./logs
 output/*
-wandb/*
+wandb
 idea.md
 log.txt
 *.pt
 *.safetensors
 .cursor/
 idea.md
+data/*
+sweep_anvil.sh
+temp

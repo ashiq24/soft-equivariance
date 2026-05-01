@@ -302,6 +302,5 @@ def create_filtered_o5_mlp(model_config: Dict[str, Any]) -> nn.Module:
 __all__ = [
     'FilteredO5MLP',
     'create_filtered_o5_mlp',
-    'get_o5_filter',
     'get_emlp_group',
 ]

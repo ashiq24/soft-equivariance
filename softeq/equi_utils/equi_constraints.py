@@ -150,6 +150,8 @@ class DiscreteRotationConstraints:
         Returns:
             (Tensor, Tensor): (basis, scaling_values)
         """
+        if not hasattr(self, 'invariant_basis') or self.invariant_basis is None:
+            self.create_invariant_basis()
         return self._select_basis(
             basis=self.invariant_basis,
             scaling_values=self.invariant_scaling_values,
