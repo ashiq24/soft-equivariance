@@ -55,6 +55,8 @@ class ELinear(nn.Module):
         else:
             self.register_parameter("bias", None)
 
+        if basis is None:
+            raise ValueError("ELinear requires a basis tensor; got None")
         self.register_buffer("basis", basis)
 
         if not enforce_equivariance:

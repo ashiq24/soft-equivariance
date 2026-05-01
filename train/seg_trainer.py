@@ -468,8 +468,10 @@ class SegTrainer:
                         logits = outputs.get('logits')
                     else:
                         logits = outputs
+                    if logits.shape[-2:] != masks.shape[-2:]:
                         logits = F.interpolate(
                             logits,
+                            size=masks.shape[-2:],
                             mode='bilinear',
                             align_corners=False
                         )
@@ -477,8 +479,10 @@ class SegTrainer:
                 
                 aug_results = test_on_augmented(
                     batch_inputs=images,
+                    batch_targets=masks,
                     model=model_wrapper,
                     task_type='segmentation',
+                    rotation_config=rotation_config,
                     criterion=self.criterion,
                     device=self.device,
                     return_consistency=True,
@@ -509,6 +513,7 @@ class SegTrainer:
             rot_consistency = rot_consistency_sum / max(rot_consistency_count, 1) if rot_consistency_count > 0 else 0.0
         else:
             rot_loss = 0.0
+            rot_miou = 0.0
             rot_pixel_acc = 0.0
             rot_consistency = 0.0
         

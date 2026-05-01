@@ -13,5 +13,4 @@ __all__ = [
     "extract_blocks",
     "get_block_norm",
     "_create_mask_from_blocks",
-    "compute_equivariance_error",
 ]

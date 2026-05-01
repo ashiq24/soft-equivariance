@@ -219,6 +219,7 @@ class MultiGeneratorInvariantProjector(nn.Module):
         for module in self.InvariantProjector_list:
             W = module(W)
         return W
+
     def smooth(self, x):
         for module in self.InvariantProjector_list:
             x = module.smooth(x)

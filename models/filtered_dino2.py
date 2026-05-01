@@ -175,7 +175,10 @@ class FilteredDinoV2(Dinov2ForImageClassification):
                 self.dinov2.embeddings.position_embeddings.requires_grad = False
 
 
-class FilteredDinoV2wRegister(Dinov2WithRegistersForImageClassification):
+_DinoV2RegisterBase = Dinov2WithRegistersForImageClassification if REGISTERS_AVAILABLE else object
+
+
+class FilteredDinoV2wRegister(_DinoV2RegisterBase):
     """
     DINOv2 with register tokens and filtered weights.
     

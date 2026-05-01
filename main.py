@@ -154,7 +154,8 @@ def main(config_path: Optional[str] = None, run_name: Optional[str] = None, args
         print(f"Loading best checkpoint from {best_checkpoint_path}")
         checkpoint = torch.load(best_checkpoint_path, map_location=device, weights_only=False)
         model.load_state_dict(checkpoint['model_state_dict'])
-        print(f"✓ Loaded best model with validation accuracy: {checkpoint.get('val_acc', 'unknown'):.4f}")
+        val_acc = checkpoint.get('val_acc', None)
+        print(f"✓ Loaded best model with validation accuracy: {val_acc:.4f}" if val_acc is not None else "✓ Loaded best model (val_acc not in checkpoint)")
         
         if logger is not None:
             try:

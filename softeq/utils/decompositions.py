@@ -138,9 +138,8 @@ def svd_decomposition(matrix):
         try:
             U, S, V = torch.linalg.svd(matrix.to(svd_device), full_matrices=False)
         except RuntimeError as e:
-            print(f"Using torch.svd instead of torch.linalg.svd")
             try:
-                U, S, V = torch.svd(matrix.to(svd_device))
+                U, S, V = torch.linalg.svd(matrix.to('cpu').float(), full_matrices=False)
             except RuntimeError:
                 raise RuntimeError(f"SVD decomposition failed: {e}")
 

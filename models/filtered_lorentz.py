@@ -138,7 +138,7 @@ class FilteredLorentzMLP(nn.Module):
                 flayer = nn.Linear(in_dim, out_dim)
                 non_lin = nn.Identity()
                 drop_out = nn.Identity()
-            elif out_rep_l == "S" and in_rep_l is not "S":
+            elif out_rep_l == "S" and in_rep_l != "S":
                 filt = get_invariant_filter_lorentz(
                     input_size=rep_dim(in_rep_l),
                     soft_threshold=soft_thresh,
