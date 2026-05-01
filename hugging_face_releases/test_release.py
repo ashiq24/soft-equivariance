@@ -99,6 +99,8 @@ def load_training_config(config_path: str, config_name: str, args) -> dict:
         model_cfg["soft_thresholding_pos"] = args.soft_thresholding_pos
     if args.n_rotations is not None:
         model_cfg["n_rotations"] = args.n_rotations
+    if args.hard_mask:
+        model_cfg["hard_mask"] = True
 
     return cfg
 
@@ -124,17 +126,47 @@ def _extract_state_dict(checkpoint_path: str) -> dict:
     raise TypeError(f"Expected dict checkpoint, got {type(ckpt)}")
 
 
+def _create_model_by_type(cfg: dict):
+    """
+    Instantiate the model directly based on type, using targeted imports
+    to avoid pulling in optional dependencies (e2cnn, emlp, etc.) that
+    get_model.py eagerly imports for all model families.
+    """
+    model_cfg = cfg.get("model", cfg)
+    model_type = model_cfg.get("type", "unknown")
+
+    if model_type == "filtered_vit":
+        from models.filtered_vit import create_filtered_vit
+        return create_filtered_vit(model_cfg)
+    elif model_type == "filtered_dinov2":
+        from models.filtered_dino2 import create_filtered_dinov2
+        return create_filtered_dinov2(model_cfg)
+    elif model_type == "filtered_vit_seg":
+        from models.filtered_vit_seg import create_filtered_vit_seg
+        return create_filtered_vit_seg(model_cfg)
+    elif model_type == "filtered_dino2_seg":
+        from models.filtered_dino2_seg import create_filtered_dino2_seg
+        return create_filtered_dino2_seg(model_cfg)
+    elif model_type == "filtered_segformer":
+        from models.filtered_segformer import create_filtered_segformer
+        return create_filtered_segformer(model_cfg)
+    elif model_type == "filtered_resnet":
+        from models.filtered_resnet import create_filtered_resnet
+        return create_filtered_resnet(model_cfg)
+    else:
+        from models.get_model import get_model
+        return get_model(cfg)
+
+
 def load_original_model(cfg: dict, checkpoint_path: str):
     """
-    Instantiate the model using get_model() (same as training) and load
+    Instantiate the model using the same factory as training and load
     the .pt checkpoint weights on top.
 
     load_pretrained_weight is forced to False so the backbone is NOT
     re-downloaded from HuggingFace Hub — weights come entirely from the
     .pt checkpoint.
     """
-    from models.get_model import get_model
-
     # Force no backbone download; weights come from the checkpoint.
     cfg["model"]["load_pretrained_weight"] = False
 
@@ -145,8 +177,9 @@ def load_original_model(cfg: dict, checkpoint_path: str):
     print(f"  n_rotations: {cfg['model'].get('n_rotations')}")
     print(f"  soft       : {cfg['model'].get('soft_thresholding')}")
     print(f"  soft_pos   : {cfg['model'].get('soft_thresholding_pos')}")
+    print(f"  hard_mask  : {cfg['model'].get('hard_mask')}")
 
-    model = get_model(cfg)
+    model = _create_model_by_type(cfg)
 
     print(f"\n  Loading checkpoint: {checkpoint_path}")
     state_dict = _extract_state_dict(checkpoint_path)
@@ -212,7 +245,8 @@ def compare_state_dicts(orig_sd: dict, hf_sd: dict) -> bool:
     if only_orig:
         print(f"  Keys only in ORIGINAL ({len(only_orig)}): "
               f"{sorted(only_orig)[:5]}{'...' if len(only_orig) > 5 else ''}")
-        ok = False
+        print(f"  (warning only — extra keys in the original are typically "
+              f"unused layers like the ViT pooler)")
     if only_hf:
         print(f"  Keys only in HF MODEL ({len(only_hf)}): "
               f"{sorted(only_hf)[:5]}{'...' if len(only_hf) > 5 else ''}")
@@ -251,10 +285,13 @@ def compare_weight_values(orig_sd: dict, hf_sd: dict) -> float:
 # Forward-pass comparison
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_input(model_type: str, image_path: str = None) -> torch.Tensor:
+def build_input(model_type: str, image_path: str = None, image_size: int = None) -> torch.Tensor:
     """Return a [1, 3, H, W] input tensor (real image or reproducible random)."""
-    is_seg = "seg" in model_type
-    size = 512 if is_seg else 224
+    if image_size is not None:
+        size = image_size
+    else:
+        is_seg = "seg" in model_type
+        size = 512 if is_seg else 224
 
     if image_path:
         try:
@@ -321,7 +358,8 @@ def main(args):
 
     # ── Forward-pass comparison ───────────────────────────────────────────────
     print("\n── Forward-pass comparison ─────────────────────────────────────────")
-    pixel_values = build_input(model_type, args.image)
+    image_size = cfg.get("data", {}).get("image_size", None)
+    pixel_values = build_input(model_type, args.image, image_size=image_size)
     orig_logits  = run_forward(orig_model, pixel_values)
     hf_logits    = run_forward(hf_model,   pixel_values)
 
@@ -398,6 +436,8 @@ if __name__ == "__main__":
                         help="Override model.soft_thresholding_pos from config.")
     parser.add_argument("--n_rotations", type=int, default=None,
                         help="Override model.n_rotations from config.")
+    parser.add_argument("--hard_mask", action="store_true", default=False,
+                        help="Use hard mask for filtering (overrides config).")
 
     # Optional real image
     parser.add_argument("--image", default=None,
