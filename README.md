@@ -186,8 +186,11 @@ If you’re implementing a new group, the quickest path is to copy the structure
 
 
 ## Huggingface Releases
-*Models will be added soon.*
 
+|Data set| Equivariance Group| Model | Link|
+|--|--|--|--|
+|PASCAL VOC| SO(2)| ViT| [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c720-s0.90/blob/main/README.md)|
+|PASCAL VOC| SO(2)| DINO-v2| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c180-s1.0-sp0.9)|
 ## Experiments
 Experiments are defined in `config/` and launched from `./scripts/`.
 
