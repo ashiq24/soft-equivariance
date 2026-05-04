@@ -109,18 +109,22 @@ JOINT_DECOMP=$(has_flag "--joint_decomposition")
 
 # ── Resolve model type and backbone from config YAML ─────────────────────────
 resolve_config_field() {
+    # $1 = section ("model" or "data"), $2 = field name
     python3 -c "
 import sys
 sys.path.insert(0, '.')
 from config.utils import load_config
 cfg = load_config('${CONFIG}', config_name='${CONFIG_NAME}')
-print(cfg.get('model', {}).get('$1', ''))
+print(cfg.get('$1', {}).get('$2', ''))
 "
 }
 
-MODEL_TYPE=$(resolve_config_field "type")
-PRETRAINED_MODEL=$(resolve_config_field "pretrained_model")
-NUM_LABELS=$(resolve_config_field "num_labels")
+MODEL_TYPE=$(resolve_config_field "model" "type")
+PRETRAINED_MODEL=$(resolve_config_field "model" "pretrained_model")
+NUM_LABELS=$(resolve_config_field "model" "num_labels")
+DATASET=$(resolve_config_field "data" "dataset")
+DECOMP_METHOD=$(resolve_config_field "model" "decomposition_method")
+: "${DECOMP_METHOD:=schur}"
 
 if [[ -z "$MODEL_TYPE" ]]; then
     echo "ERROR: could not resolve model.type from config ${CONFIG} [${CONFIG_NAME}]"; exit 1
@@ -130,6 +134,7 @@ if [[ -z "$NUM_LABELS" ]]; then
 fi
 
 # Map training model type -> HF model_arch
+# Note: filtered_segformer is not yet supported for HF release (no modeling file in _shared/).
 declare -A TYPE_TO_ARCH=(
     ["filtered_vit"]="filtered_vit"
     ["filtered_dinov2"]="filtered_dinov2"
@@ -139,14 +144,23 @@ declare -A TYPE_TO_ARCH=(
 
 MODEL_ARCH="${TYPE_TO_ARCH[$MODEL_TYPE]:-}"
 if [[ -z "$MODEL_ARCH" ]]; then
-    echo "ERROR: unsupported model type '$MODEL_TYPE' for HF release"; exit 1
+    echo "ERROR: unsupported model type '$MODEL_TYPE' for HF release."
+    echo "       Supported types: ${!TYPE_TO_ARCH[*]}"
+    echo "       Note: 'filtered_segformer' is not yet supported (no modeling file in _shared/)."
+    exit 1
 fi
 
 # ── Build output folder name ─────────────────────────────────────────────────
-# Pattern: filtered-{backbone_short}-{task}-c{n_rot}-s{soft}
+# Pattern: filtered-{backbone_short}-{dataset_tag}-seg-c{n_rot}-s{soft}
 BACKBONE_SHORT=$(echo "$PRETRAINED_MODEL" | sed 's|.*/||')  # e.g. "vit-base-patch16-224"
 if echo "$MODEL_TYPE" | grep -q "seg"; then
-    TASK_TAG="voc-seg"
+    # Derive a short dataset tag from the data.dataset config field.
+    case "$DATASET" in
+        pascal_voc*)  DATASET_TAG="voc" ;;
+        ade20k*)      DATASET_TAG="ade" ;;
+        *)            DATASET_TAG="${DATASET:-voc}" ;;  # fallback to raw name or "voc"
+    esac
+    TASK_TAG="${DATASET_TAG}-seg"
 else
     TASK_TAG="imagenet"
 fi
@@ -159,6 +173,7 @@ echo "===================================================================="
 echo "  Automated HuggingFace Release Pipeline"
 echo "===================================================================="
 echo "  Config         : ${CONFIG} [${CONFIG_NAME}]"
+echo "  Dataset        : ${DATASET:-unknown}"
 echo "  Model type     : ${MODEL_TYPE}"
 echo "  Model arch     : ${MODEL_ARCH}"
 echo "  Backbone       : ${PRETRAINED_MODEL}"
@@ -195,6 +210,7 @@ PACKAGE_CMD=(
     --soft_thresholding "$SOFT_THRESH"
     --soft_thresholding_pos "$SOFT_THRESH_POS"
     --group_type "$GROUP_TYPE"
+    --decomposition_method "$DECOMP_METHOD"
 )
 [[ "$HARD_MASK" == "true" ]]    && PACKAGE_CMD+=(--hard_mask)
 [[ "$PRESERVE_NORM" == "true" ]] && PACKAGE_CMD+=(--preserve_norm)
