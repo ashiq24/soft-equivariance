@@ -5,12 +5,6 @@
 
 ![Soft equivariance overview](notebooks/figs/soft_eq_fig.png)
 
-## Overview
-This repository contains the official code for **Tunable Soft Equivariance with Guarantee (CVPR 2026)**.
-We introduce *soft equivariance*: a simple mechanism that **continuously interpolates** between strict group equivariance and the original (pretrained) model, controlled by a single softness parameter.
-
-The implementation is designed for practical use in modern vision stacks (such as ViT / ResNet / DINOv2 / SegFormer) and scientific settings (equivariant MLPs for O(5) and Lorentz groups), with lightweight tooling for training and evaluating robustness/consistency under group actions. 
-
 ## Installation
 Run the following:
 ```bash
@@ -189,8 +183,10 @@ If you’re implementing a new group, the quickest path is to copy the structure
 
 |Data set| Equivariance Group| Model | Link|
 |--|--|--|--|
-|PASCAL VOC| SO(2)| ViT| [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c720-s0.90/blob/main/README.md)|
+|PASCAL VOC| SO(2)| ViT| [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c720-s0.90)|
 |PASCAL VOC| SO(2)| DINO-v2| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c180-s1.0-sp0.9)|
+|PASCAL VOC| $C_4$ (90 degree rotation)| ViT| [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c4-s0.9-sp0.9)|
+|PASCAL VOC| $C_4$ (90 degree rotation)| DINO-v2| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c4-s0.9-sp1.0)|
 ## Experiments
 Experiments are defined in `config/` and launched from `./scripts/`.
 
