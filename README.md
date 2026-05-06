@@ -181,12 +181,12 @@ If you’re implementing a new group, the quickest path is to copy the structure
 
 ## Huggingface Releases
 
-|Data set| Equivariance Group| Model | Link|
-|--|--|--|--|
-|PASCAL VOC| $SO(2)$| ViT| [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c720-s0.90)|
-|PASCAL VOC| $SO(2)$| DINO-v2| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c180-s1.0-sp0.9)|
-|PASCAL VOC| $C_4$ (90 degree rotation)| ViT| [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c4-s0.9-sp0.9)|
-|PASCAL VOC| $C_4$ (90 degree rotation)| DINO-v2| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c4-s0.9-sp1.0)|
+|Data set| Equivariance Group| Model |Training Im Size| Link|
+|--|--|--|--|--|
+|PASCAL VOC| $SO(2)$| ViT| 224x224 | [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c720-s0.90)|
+|PASCAL VOC| $SO(2)$| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c180-s1.0-sp0.9)|
+|PASCAL VOC| $C_4$ (90 degree rotation)| ViT| 224x224 | [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c4-s0.9-sp0.9)|
+|PASCAL VOC| $C_4$ (90 degree rotation)| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c4-s0.9-sp1.0)|
 ## Experiments
 Experiments are defined in `config/` and launched from `./scripts/`.
 
