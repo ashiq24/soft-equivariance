@@ -41,6 +41,11 @@ class SegTrainer:
         embedding_lr = train_cfg.get('embedding_lr', None)
         self.max_grad_norm = train_cfg.get('max_grad_norm', None)
 
+        if backbone_lr is not None:
+            backbone_lr = float(backbone_lr)
+        if embedding_lr is not None:
+            embedding_lr = float(embedding_lr)
+
         self.ignore_index = 255
         
         self.criterion = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
