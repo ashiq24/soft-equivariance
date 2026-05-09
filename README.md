@@ -187,6 +187,8 @@ If you’re implementing a new group, the quickest path is to copy the structure
 |PASCAL VOC| $SO(2)$| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c180-s1.0-sp0.9)|
 |PASCAL VOC| $C_4$ (90 degree rotation)| ViT| 224x224 | [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c4-s0.9-sp0.9)|
 |PASCAL VOC| $C_4$ (90 degree rotation)| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c4-s0.9-sp1.0)|
+|ADE 20K| $C_4$ (90 degree rotation)| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-ade20k-seg-c4-s0.8-sp1.0)|
+|ADE 20K| $SO(2)$ | DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-ade20k-seg-c180-s0.8-sp1.0)|
 ## Experiments
 Experiments are defined in `config/` and launched from `./scripts/`.
 
