@@ -1,18 +1,8 @@
-from models.test_models import TestModel, TestEqModel, TestEqModelResidual
-from models.residualCnn import ResidualCnn
-from models.filtered_vit import create_filtered_vit
-from models.filtered_segformer import create_filtered_segformer
-from models.filtered_dino2 import create_filtered_dinov2
-from models.filtered_vit_seg import create_filtered_vit_seg
-from models.filtered_dino2_seg import create_filtered_dino2_seg
-from models.filtered_resnet import create_filtered_resnet
-from models.filtered_o5 import create_filtered_o5_mlp
-from models.filtered_lorentz import create_filtered_lorentz_mlp
-from models.emlp_models import create_emlp_o5_mlp, create_emlp_lorentz_mlp
-from softeq.equi_utils.equi_constraints import DiscreteRotationConstraints
-from canonicalization.network import CanonicalizationNetwork
-from canonicalization.wrapper import ClassificationCanonicalizationWrapper, SegmentationCanonicalizationWrapper
 import torch
+
+# NOTE: This file intentionally avoids importing all model dependencies at module import time.
+# Many model backends have optional dependencies (e.g., e2cnn). We import lazily inside
+# `get_model()` branches to keep unrelated model types usable without installing everything.
 
 def _create_canonicalization_network(canon_config, model_config=None):
     """
@@ -58,6 +48,8 @@ def _create_canonicalization_network(canon_config, model_config=None):
     if n_rotations is None:
         n_rotations = 4
     
+    from canonicalization.network import CanonicalizationNetwork
+
     model = CanonicalizationNetwork(
         n_rotations=n_rotations,
         in_channels=canon_config.get('in_channels', 3),
@@ -85,9 +77,8 @@ def get_model(config):
     Create model based on configuration.
     
     Args:
-        config: Configuration dictionary containing model parameters.
-               For 'filtered_o5', expects full config with 'model' section.
-               For other models, expects model-specific config.
+        config: Either a full experiment config dict (with a top-level 'model' section)
+               or a model-specific config dict (with a 'type' key).
     
     Returns:
         Model instance
@@ -104,54 +95,83 @@ def get_model(config):
     
     # Regular models (no canonicalization)
     if model_type == 'filtered_vit':
+        from models.filtered_vit import create_filtered_vit
         return create_filtered_vit(model_config)
     elif model_type == 'filtered_dinov2':
+        from models.filtered_dino2 import create_filtered_dinov2
         return create_filtered_dinov2(model_config)
+    elif model_type == 'filtered_dinov3':
+        from models.filtered_dinov3 import create_filtered_dinov3
+        return create_filtered_dinov3(model_config)
     elif model_type == 'filtered_resnet':
+        from models.filtered_resnet import create_filtered_resnet
         return create_filtered_resnet(model_config)
     elif model_type == 'filtered_o5':
-        # O(5)-specific equivariant MLP - pass full config with 'model' key
+        # O(5)-specific equivariant MLP
+        from models.filtered_o5 import create_filtered_o5_mlp
         return create_filtered_o5_mlp(model_config)
     elif model_type == 'filtered_lorentz':
+        from models.filtered_lorentz import create_filtered_lorentz_mlp
         return create_filtered_lorentz_mlp(model_config)
     elif model_type == 'emlp_o5':
+        from models.emlp_models import create_emlp_o5_mlp
         return create_emlp_o5_mlp(model_config)
     elif model_type == 'emlp_lorentz':
+        from models.emlp_models import create_emlp_lorentz_mlp
         return create_emlp_lorentz_mlp(model_config)
     elif model_type == 'filtered_vit_seg':
+        from models.filtered_vit_seg import create_filtered_vit_seg
         return create_filtered_vit_seg(model_config)
     elif model_type == 'filtered_dino2_seg':
+        from models.filtered_dino2_seg import create_filtered_dino2_seg
         return create_filtered_dino2_seg(model_config)
+    elif model_type == 'filtered_dinov3_seg':
+        from models.filtered_dinov3_seg import create_filtered_dinov3_seg
+        return create_filtered_dinov3_seg(model_config)
     elif model_type == 'filtered_segformer':
+        from models.filtered_segformer import create_filtered_segformer
         return create_filtered_segformer(model_config)
     
     
     # Canonicalization baselines (wrapped models)
     elif model_type == 'filtered_vit_canon':
+        from canonicalization.wrapper import ClassificationCanonicalizationWrapper
+        from models.filtered_vit import create_filtered_vit
         base_model = create_filtered_vit(config)
         canon_net = _create_canonicalization_network(config.get('canonicalization', {}), config)
         return ClassificationCanonicalizationWrapper(base_model, canon_net)
     elif model_type == 'filtered_dinov2_canon':
+        from canonicalization.wrapper import ClassificationCanonicalizationWrapper
+        from models.filtered_dino2 import create_filtered_dinov2
         base_model = create_filtered_dinov2(config)
         canon_net = _create_canonicalization_network(config.get('canonicalization', {}), config)
         return ClassificationCanonicalizationWrapper(base_model, canon_net)
     elif model_type == 'filtered_resnet_canon':
+        from canonicalization.wrapper import ClassificationCanonicalizationWrapper
+        from models.filtered_resnet import create_filtered_resnet
         base_model = create_filtered_resnet(config)
         canon_net = _create_canonicalization_network(config.get('canonicalization', {}), config)
         return ClassificationCanonicalizationWrapper(base_model, canon_net)
     elif model_type == 'filtered_vit_seg_canon':
+        from canonicalization.wrapper import SegmentationCanonicalizationWrapper
+        from models.filtered_vit_seg import create_filtered_vit_seg
         base_model = create_filtered_vit_seg(config)
         canon_net = _create_canonicalization_network(config.get('canonicalization', {}), config)
         return SegmentationCanonicalizationWrapper(base_model, canon_net)
     elif model_type == 'filtered_dinov2_seg_canon': 
+        from canonicalization.wrapper import SegmentationCanonicalizationWrapper
+        from models.filtered_dino2_seg import create_filtered_dino2_seg
         base_model = create_filtered_dino2_seg(config)
         canon_net = _create_canonicalization_network(config.get('canonicalization', {}), config)
         return SegmentationCanonicalizationWrapper(base_model, canon_net)
     elif model_type == 'filtered_segformer_canon':
+        from canonicalization.wrapper import SegmentationCanonicalizationWrapper
+        from models.filtered_segformer import create_filtered_segformer
         base_model = create_filtered_segformer(config)
         canon_net = _create_canonicalization_network(config.get('canonicalization', {}), config)
         return SegmentationCanonicalizationWrapper(base_model, canon_net)
     elif model_type == 'residual_cnn':
+        from models.residualCnn import ResidualCnn
         return ResidualCnn(
             num_layers=config['num_layers'],
             residual_strength=config['residual_strength'],
@@ -198,6 +218,7 @@ def get_model(config):
             hard=config.get('hard', True)
         )
     elif model_type == 'fully_connected_eq':
+        from models.test_models import TestEqModel
         model = TestEqModel(
                             nlayers=config['nlayers'],
                             input_size=config['image_size'],
@@ -214,6 +235,7 @@ def get_model(config):
         )
         return model
     elif model_type == 'fully_connected_eq_residual':
+        from models.test_models import TestEqModelResidual
         model = TestEqModelResidual(
                             nlayers=config['nlayers'],
                             input_size=config['image_size'],
@@ -228,6 +250,7 @@ def get_model(config):
         )
         return model
     elif model_type == 'test_model':
+        from models.test_models import TestModel
         # Create TestModel (original functionality)
         nlayers = config['nlayers']
         feature_size = config['feature_size']
@@ -251,3 +274,5 @@ def get_model(config):
         else:
             raise NotImplementedError("Please use 'fully_connected_eq' model type for equivariant TestEqModel.")
         return model
+
+    raise ValueError(f"Unknown model type: {model_type}")
