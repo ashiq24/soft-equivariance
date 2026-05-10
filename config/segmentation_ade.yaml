@@ -310,7 +310,7 @@ dinov2_seg_canon_c18:
 dinov3_seg:
   inherit_from: segformer_base
   experiment:
-    run_name: dinov3_seg_ade20k_ft
+    run_name: dinov3_seg_ade20k
   data:
     image_size: 512
     # 48GB test runs should fit; increase on 80GB if desired
