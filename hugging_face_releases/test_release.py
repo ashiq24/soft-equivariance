@@ -147,6 +147,12 @@ def _create_model_by_type(cfg: dict):
     elif model_type == "filtered_dino2_seg":
         from models.filtered_dino2_seg import create_filtered_dino2_seg
         return create_filtered_dino2_seg(model_cfg)
+    elif model_type == "filtered_dinov3":
+        from models.filtered_dinov3 import create_filtered_dinov3
+        return create_filtered_dinov3(model_cfg)
+    elif model_type == "filtered_dinov3_seg":
+        from models.filtered_dinov3_seg import create_filtered_dinov3_seg
+        return create_filtered_dinov3_seg(model_cfg)
     elif model_type == "filtered_segformer":
         from models.filtered_segformer import create_filtered_segformer
         return create_filtered_segformer(model_cfg)

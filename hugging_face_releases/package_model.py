@@ -15,10 +15,15 @@ Output folder structure
   configuration_softeq.py       # SoftEqConfig class
   modeling_filtered_vit.py      # FilteredViT (classification only)
   modeling_filtered_dinov2.py   # FilteredDinoV2 / FilteredDinoV2wRegister (classification)
+  modeling_filtered_dinov3.py   # FilteredDinoV3 (classification)
   modeling_filtered_vit_seg.py  # FilteredViTSeg (segmentation only)
   modeling_filtered_dinov2_seg.py  # FilteredDino2Seg / wRegister (segmentation)
+  modeling_filtered_dinov3_seg.py # FilteredDinoV3Seg (segmentation)
+  modeling_filtered_dinov3.py # FilteredDinoV3 (classification)
+  modeling_filtered_dinov3_seg.py  # FilteredDinoV3Seg (segmentation)
   filtered_layers_vit.py        # ViT monkeypatch helpers
   filtered_layers_dinov2.py     # DINOv2 monkeypatch helpers
+  filtered_layers_dinov3.py     # DINOv3 monkeypatch helpers (patch conv + RoPE)
   softeq/                       # Soft-equivariance core (filters, projectors)
 
 Naming convention
@@ -79,32 +84,39 @@ SHARED_FILES = [
     "configuration_softeq.py",
     "modeling_filtered_vit.py",
     "modeling_filtered_dinov2.py",
+    "modeling_filtered_dinov3.py",
     "modeling_filtered_vit_seg.py",
     "modeling_filtered_dinov2_seg.py",
+    "modeling_filtered_dinov3_seg.py",
     "filtered_layers_vit.py",
     "filtered_layers_dinov2.py",
+    "filtered_layers_dinov3.py",
 ]
 
 # Architecture → primary modeling file name
 ARCH_TO_MODULE = {
     "filtered_vit":       "modeling_filtered_vit",
     "filtered_dinov2":    "modeling_filtered_dinov2",
+    "filtered_dinov3":    "modeling_filtered_dinov3",
     "filtered_vit_seg":   "modeling_filtered_vit_seg",
     "filtered_dino2_seg": "modeling_filtered_dinov2_seg",
+    "filtered_dinov3_seg": "modeling_filtered_dinov3_seg",
 }
 
 # Architecture → HuggingFace class name in that module
 ARCH_TO_CLASS = {
     "filtered_vit":       "FilteredViT",
     "filtered_dinov2":    "FilteredDinoV2",
+    "filtered_dinov3":    "FilteredDinoV3",
     "filtered_vit_seg":   "FilteredViTSeg",
     "filtered_dino2_seg": "FilteredDino2Seg",
+    "filtered_dinov3_seg": "FilteredDinoV3Seg",
 }
 
 
 def build_config_dict(args) -> dict:
     """Build the config.json payload from command-line arguments."""
-    return {
+    cfg = {
         "model_type": "soft_equivariant",
         "model_arch": args.model_arch,
         "pretrained_model": args.pretrained_model,
@@ -139,6 +151,9 @@ def build_config_dict(args) -> dict:
         "transformers_version": _get_transformers_version(),
         "torch_dtype": "float32",
     }
+    if getattr(args, "image_size", None) is not None:
+        cfg["image_size"] = args.image_size
+    return cfg
 
 
 def _get_transformers_version() -> str:
@@ -204,8 +219,9 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", required=True,
                         help="Destination folder for the packaged model.")
     parser.add_argument("--model_arch", required=True,
-                        choices=["filtered_vit", "filtered_dinov2",
-                                 "filtered_vit_seg", "filtered_dino2_seg"],
+                        choices=["filtered_vit", "filtered_dinov2", "filtered_dinov3",
+                                 "filtered_vit_seg", "filtered_dino2_seg",
+                                 "filtered_dinov3_seg"],
                         help="Model architecture variant.")
     parser.add_argument("--pretrained_model", required=True,
                         help="HuggingFace backbone id (e.g. google/vit-base-patch16-224).")
@@ -239,6 +255,14 @@ if __name__ == "__main__":
                         dest="joint_decomposition", action="store_false")
     parser.add_argument("--ignore_index", type=int, default=255,
                         help="Ignored label index for segmentation loss.")
+
+    parser.add_argument(
+        "--image_size",
+        type=int,
+        default=None,
+        help="Fine-tuning input resolution for DINOv3 RoPE coord filters (e.g. 512 for ADE20K). "
+             "Recommended when model_arch is filtered_dinov3 or filtered_dinov3_seg.",
+    )
 
     # Weights
     parser.add_argument("--safetensors", default=None,

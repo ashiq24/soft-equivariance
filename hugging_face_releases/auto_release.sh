@@ -124,6 +124,18 @@ PRETRAINED_MODEL=$(resolve_config_field "model" "pretrained_model")
 NUM_LABELS=$(resolve_config_field "model" "num_labels")
 DATASET=$(resolve_config_field "data" "dataset")
 DECOMP_METHOD=$(resolve_config_field "model" "decomposition_method")
+IMAGE_SIZE_MODEL=$(resolve_config_field "model" "image_size")
+IMAGE_SIZE_DATA=$(resolve_config_field "data" "image_size")
+IMAGE_SIZE="${IMAGE_SIZE_MODEL}"
+if [[ -z "$IMAGE_SIZE" ]]; then IMAGE_SIZE="${IMAGE_SIZE_DATA}"; fi
+if [[ -z "$IMAGE_SIZE" && "$MODEL_TYPE" == *dinov3* ]]; then
+    echo "WARNING: no model.image_size or data.image_size in config; using a heuristic default for DINOv3 RoPE filters."
+    if [[ "$MODEL_TYPE" == *dinov3_seg ]]; then
+        IMAGE_SIZE="512"
+    else
+        IMAGE_SIZE="224"
+    fi
+fi
 : "${DECOMP_METHOD:=schur}"
 
 if [[ -z "$MODEL_TYPE" ]]; then
@@ -138,8 +150,10 @@ fi
 declare -A TYPE_TO_ARCH=(
     ["filtered_vit"]="filtered_vit"
     ["filtered_dinov2"]="filtered_dinov2"
+    ["filtered_dinov3"]="filtered_dinov3"
     ["filtered_vit_seg"]="filtered_vit_seg"
     ["filtered_dino2_seg"]="filtered_dino2_seg"
+    ["filtered_dinov3_seg"]="filtered_dinov3_seg"
 )
 
 MODEL_ARCH="${TYPE_TO_ARCH[$MODEL_TYPE]:-}"
@@ -178,6 +192,9 @@ echo "  Model type     : ${MODEL_TYPE}"
 echo "  Model arch     : ${MODEL_ARCH}"
 echo "  Backbone       : ${PRETRAINED_MODEL}"
 echo "  Num labels     : ${NUM_LABELS}"
+if [[ -n "${IMAGE_SIZE:-}" ]]; then
+    echo "  image_size     : ${IMAGE_SIZE}"
+fi
 echo "  N rotations    : ${N_ROTATIONS}"
 echo "  Soft threshold : ${SOFT_THRESH}"
 echo "  Soft thresh pos: ${SOFT_THRESH_POS}"
@@ -215,6 +232,9 @@ PACKAGE_CMD=(
 [[ "$HARD_MASK" == "true" ]]    && PACKAGE_CMD+=(--hard_mask)
 [[ "$PRESERVE_NORM" == "true" ]] && PACKAGE_CMD+=(--preserve_norm)
 [[ "$JOINT_DECOMP" == "true" ]] && PACKAGE_CMD+=(--joint_decomposition)
+if [[ -n "$IMAGE_SIZE" && "$MODEL_TYPE" == *dinov3* ]]; then
+    PACKAGE_CMD+=(--image_size "$IMAGE_SIZE")
+fi
 
 "${PACKAGE_CMD[@]}"
 
