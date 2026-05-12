@@ -5,15 +5,54 @@
 
 ![Soft equivariance overview](notebooks/figs/soft_eq_fig.png)
 
-## Installation
-Run the following:
-```bash
-pip install -r requirements.txt
+
+## Huggingface Releases
+
+|Finetuned on| Equivariance Group| Model |Training Im Size| Link|
+|--|--|--|--|--|
+|PASCAL VOC| $SO(2)$| ViT| 224x224 | [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c720-s0.90)|
+|PASCAL VOC| $SO(2)$| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c180-s1.0-sp0.9)|
+|PASCAL VOC| $C_4$ (90 degree rotation)| ViT| 224x224 | [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c4-s0.9-sp0.9)|
+|PASCAL VOC| $C_4$ | DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c4-s0.9-sp1.0)|
+|ADE 20K| $C_4$ (90 degree rotation)| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-ade20k-seg-c4-s0.8-sp1.0)|
+|ADE 20K| $SO(2)$ | DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-ade20k-seg-c180-s0.8-sp1.0)
+|ADE 20K| $C_4$ | DINO-v3| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8-sp0.8)|
+|ADE 20K| $C_4$ | DINO-v3| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4-sp0.4)
+|ADE 20K| $C_4$ | DINO-v3| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1-sp0.1)|
+|ADE 20K| $SO(2)$| DINO-v3| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s0.1-sp0.8)
+
+**Example**
+```python
+from transformers import AutoModel, AutoConfig
+import torch
+import torch.nn.functional as F
+
+model_id = "ashiq24/softeq-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8-sp0.8"
+
+config = AutoConfig.from_pretrained(model_id, trust_remote_code=True)
+model  = AutoModel.from_pretrained(model_id, trust_remote_code=True)
+model.eval()
+
+# Example Input
+pixel_values = torch.randn(1, 3, 512, 512)
+
+with torch.no_grad():
+    outputs = model(pixel_values=pixel_values)
+
+# outputs.logits shape: (1, num_labels, H, W) — already upsampled to input resolution
+seg_map = outputs.logits.argmax(dim=1)   
+
+# use models feature 
+with torch.no_grad():
+    features = model.backbone(pixel_values=pixel_values)
+
+# feature shape
+print(f"Shape of backbone features: {features.last_hidden_state.shape}")
+
 ```
 
-Notes:
-- **Equivariant-MLP (EMLP)**: you can install from PyPI (`pip install emlp`) or use the bundled copy in `external/equivariant-MLP/` (see its `setup.py` at `external/equivariant-MLP/setup.py`).
-- Most vision backbones rely on HuggingFace `transformers` and will download pretrained weights on first use.
+
+
 
 ## Quick start
 At a high level, **soft equivariance** is implemented by *filtering (projecting) pretrained weights to suitable subspaces at forward time*. The degree of equivariance is controlled by a parameter named **softness** (ranging from 0.0 to 1.0), where 0.0 corresponds to strict equivariance and 1.0 corresponds to the original weights (unconstrained).
@@ -167,16 +206,7 @@ If you’re implementing a new group, the quickest path is to copy the structure
 
 </details>
 
-## Huggingface Releases
-
-|Data set| Equivariance Group| Model |Training Im Size| Link|
-|--|--|--|--|--|
-|PASCAL VOC| $SO(2)$| ViT| 224x224 | [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c720-s0.90)|
-|PASCAL VOC| $SO(2)$| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c180-s1.0-sp0.9)|
-|PASCAL VOC| $C_4$ (90 degree rotation)| ViT| 224x224 | [HF](https://huggingface.co/ashiq24/softeq-vit-base-patch16-224-voc-seg-c4-s0.9-sp0.9)|
-|PASCAL VOC| $C_4$ (90 degree rotation)| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-voc-seg-c4-s0.9-sp1.0)|
-|ADE 20K| $C_4$ (90 degree rotation)| DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-ade20k-seg-c4-s0.8-sp1.0)|
-|ADE 20K| $SO(2)$ | DINO-v2| 512x512| [HF](https://huggingface.co/ashiq24/softeq-dinov2-base-ade20k-seg-c180-s0.8-sp1.0)|
+|
 
 ## 🛠️ Practical Tips
 - For pre-trained models, less aggressive filtering (softness value > 0.7) usually works better.
@@ -187,6 +217,15 @@ If you’re implementing a new group, the quickest path is to copy the structure
 - `standalone/` contains “all-in-one” scripts with inlined dependencies for quick experiments.
 - `notebooks/` contains exploratory notebooks and figures/gifs (saved under `notebooks/figs/`).
 
+## Installation
+Run the following:
+```bash
+pip install -r requirements.txt
+```
+
+Notes:
+- **Equivariant-MLP (EMLP)**: you can install from PyPI (`pip install emlp`) or use the bundled copy in `external/equivariant-MLP/` (see its `setup.py` at `external/equivariant-MLP/setup.py`).
+- Most vision backbones rely on HuggingFace `transformers` and will download pretrained weights on first use.
 
 ## Experiments
 Experiments are defined in `config/` and launched from `./scripts/`.
