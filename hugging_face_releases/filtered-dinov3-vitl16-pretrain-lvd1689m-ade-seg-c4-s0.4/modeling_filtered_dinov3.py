@@ -6,6 +6,8 @@ Training checkpoints use ``backbone`` + ``classifier`` keys (FilteredDinoV3).
 
 from typing import Optional
 
+import os
+
 import torch
 import torch.nn as nn
 from transformers import AutoModel, AutoConfig, PreTrainedModel
@@ -27,8 +29,41 @@ class FilteredDinoV3(PreTrainedModel):
     def __init__(self, config: SoftEqConfig):
         super().__init__(config)
 
-        print(f"Loading DINOv3 classification backbone config from: {config.pretrained_model}")
-        backbone_cfg = AutoConfig.from_pretrained(config.pretrained_model)
+        filename = "backbone_config_dinov3-vitl16-pretrain-lvd1689m.json"
+        backbone_cfg_path = os.path.join(os.path.dirname(__file__), filename)
+        if not os.path.exists(backbone_cfg_path):
+            from huggingface_hub import snapshot_download
+
+            parts = os.path.normpath(os.path.dirname(os.path.abspath(__file__))).split(os.sep)
+            idx = next((i for i, p in enumerate(parts) if p == "transformers_modules"), None)
+            if idx is None or idx + 2 >= len(parts):
+                raise FileNotFoundError(
+                    "Missing vendored DINOv3 backbone config and cannot infer repo to download it. "
+                    f"Expected local file: {backbone_cfg_path}."
+                )
+            owner = parts[idx + 1]
+            repo = parts[idx + 2].replace("_hyphen_", "-").replace("_dot_", ".")
+            revision = parts[idx + 3] if idx + 3 < len(parts) else None
+
+            snap = snapshot_download(
+                f"{owner}/{repo}",
+                revision=revision,
+                allow_patterns=[filename],
+            )
+            backbone_cfg_path = os.path.join(snap, filename)
+
+        print(f"Loading DINOv3 backbone config from: {backbone_cfg_path}")
+        backbone_cfg = AutoConfig.from_pretrained(backbone_cfg_path)
+        if getattr(backbone_cfg, "model_type", None) != "dinov3_vit":
+            raise ValueError(
+                f"Unexpected backbone config model_type={getattr(backbone_cfg, 'model_type', None)}; "
+                "expected 'dinov3_vit'."
+            )
+        if getattr(backbone_cfg, "hidden_size", None) != 1024 or getattr(backbone_cfg, "patch_size", None) != 16:
+            raise ValueError(
+                "Backbone config does not look like dinov3 vit-large/16 "
+                f"(hidden_size={getattr(backbone_cfg, 'hidden_size', None)}, patch_size={getattr(backbone_cfg, 'patch_size', None)})."
+            )
         self.backbone = AutoModel.from_config(backbone_cfg)
 
         hidden_size = backbone_cfg.hidden_size

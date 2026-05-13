@@ -17,12 +17,47 @@ the rest of the model (attention, MLP, etc.) is untouched.
 """
 
 import math
+import os
+import sys
+import importlib
+
 import torch
 from types import MethodType
 from typing import Optional
 
-from softeq.layers.fconv2d import FilteredConv2d
-from softeq.equi_utils.filter_factory import get_invariant_filter
+
+def _ensure_softeq():
+    """Make the bundled softeq package importable."""
+    _dir = os.path.dirname(os.path.abspath(__file__))
+
+    if os.path.isdir(os.path.join(_dir, "softeq")):
+        if _dir not in sys.path:
+            sys.path.insert(0, _dir)
+        return
+
+    if importlib.util.find_spec("softeq") is not None:
+        return
+
+    from huggingface_hub import snapshot_download
+
+    parts = os.path.normpath(_dir).split(os.sep)
+    idx = next((i for i, p in enumerate(parts) if p == "transformers_modules"), None)
+    if idx is None or idx + 2 >= len(parts):
+        raise ImportError("Cannot locate the bundled softeq package.")
+    owner = parts[idx + 1]
+    repo = parts[idx + 2].replace("_hyphen_", "-").replace("_dot_", ".")
+    revision = parts[idx + 3] if idx + 3 < len(parts) else None
+    snap = snapshot_download(
+        f"{owner}/{repo}", revision=revision, allow_patterns=["softeq/**"],
+    )
+    if snap not in sys.path:
+        sys.path.insert(0, snap)
+
+
+_ensure_softeq()
+
+FilteredConv2d = importlib.import_module("softeq.layers.fconv2d").FilteredConv2d
+get_invariant_filter = importlib.import_module("softeq.equi_utils.filter_factory").get_invariant_filter
 
 from transformers.models.dinov3_vit.modeling_dinov3_vit import (
     get_patches_center_coordinates,

@@ -91,6 +91,8 @@ SHARED_FILES = [
     "filtered_layers_vit.py",
     "filtered_layers_dinov2.py",
     "filtered_layers_dinov3.py",
+    # Vendored backbone configs (avoid Hub fetches for gated bases)
+    "backbone_config_dinov3-vitl16-pretrain-lvd1689m.json",
 ]
 
 # Architecture → primary modeling file name
