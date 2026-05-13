@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tunable Soft Equivariance with Guarantee (CVPR 2026)</title>
+  <meta name="description" content="Soft equivariance: a forward-time weight filtering method that continuously interpolates between strict equivariance and the original pretrained model via a single softness parameter." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <div class="title">Soft Equivariance</div>
+        <div class="tag">CVPR 2026</div>
+      </div>
+      <nav class="nav-links" aria-label="Section navigation">
+        <a href="#overview">Overview</a>
+        <a href="#method">Method</a>
+        <a href="#visuals">Visuals</a>
+        <a href="#code">Code</a>
+        <a href="#cite">Cite</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="h-eyebrow">
+            <span>Paper</span>
+            <span class="small">arXiv:2603.26657</span>
+          </div>
+          <h1 class="h-title">Tunable Soft Equivariance with Guarantee</h1>
+          <p class="h-sub">
+            A lightweight mechanism that continuously interpolates between strict group equivariance and the original pretrained model,
+            controlled by a single <strong>softness</strong> parameter.
+            Implemented as forward-time weight filtering for modern vision backbones (ViT / ResNet / DINO / SegFormer) and scientific equivariant MLPs.
+          </p>
+          <div class="cta" role="group" aria-label="Primary links">
+            <a class="btn primary" href="https://arxiv.org/pdf/2603.26657" target="_blank" rel="noreferrer">Read the paper →</a>
+            <a class="btn" href="https://github.com/ashiq24/soft-equivariance" target="_blank" rel="noreferrer">GitHub repo →</a>
+          </div>
+
+          <div class="section" id="overview">
+            <h2>What is soft equivariance?</h2>
+            <p>
+              Many pretrained models break under group actions (e.g., rotations), while strict equivariance can be too restrictive.
+              Soft equivariance enforces symmetry <em>gradually</em> by projecting weights to invariant/equivariant subspaces and interpolating
+              back to the original weights with a single knob: <code>softness ∈ [0, 1]</code>.
+            </p>
+
+            <div class="grid-3" aria-label="Key points">
+              <div class="kpi">
+                <div class="k">Single parameter</div>
+                <div class="v">softness: 0.0 → equivariant, 1.0 → original</div>
+              </div>
+              <div class="kpi">
+                <div class="k">Forward-time filtering</div>
+                <div class="v">No architecture change; wrap existing layers</div>
+              </div>
+              <div class="kpi">
+                <div class="k">Broad coverage</div>
+                <div class="v">Vision + scientific groups (C4, SO(3), O(5), …)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <figure class="card" aria-label="Soft equivariance overview figure">
+          <img class="figure" src="notebooks/figs/soft_eq_fig.png" alt="Soft equivariance overview: equivariant to non-equivariant spectrum" loading="eager" />
+          <figcaption class="figcap">
+            <strong>Overview.</strong> Soft equivariance smoothly interpolates between strict equivariance (softness=0.0) and the original weights (softness=1.0).
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="container">
+        <h2>How it works (schema)</h2>
+        <p>
+          Soft equivariance is applied at forward time by filtering (projecting) pretrained weights to invariant/equivariant subspaces,
+          then interpolating between the projected and original weights.
+        </p>
+
+        <div class="schema" role="img" aria-label="Method schema diagram">
+          <svg viewBox="0 0 980 190" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#7aa2ff" stop-opacity="0.35"/>
+                <stop offset="1" stop-color="#9ee7ff" stop-opacity="0.12"/>
+              </linearGradient>
+            </defs>
+            <rect x="14" y="16" width="952" height="158" rx="18" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.14)"/>
+
+            <g font-family="ui-sans-serif, system-ui" fill="rgba(255,255,255,0.92)">
+              <rect x="42" y="62" width="210" height="66" rx="14" fill="url(#g)" stroke="rgba(255,255,255,0.16)"/>
+              <text x="62" y="90" font-size="14" font-weight="650">Pretrained model</text>
+              <text x="62" y="112" font-size="12" fill="rgba(255,255,255,0.70)">ViT / ResNet / DINO / …</text>
+
+              <rect x="320" y="50" width="280" height="90" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.16)"/>
+              <text x="342" y="78" font-size="14" font-weight="650">Forward-time filtering</text>
+              <text x="342" y="100" font-size="12" fill="rgba(255,255,255,0.70)">Project weights to equivariant / invariant subspaces</text>
+              <text x="342" y="120" font-size="12" fill="rgba(255,255,255,0.70)">Interpolate with softness ∈ [0,1]</text>
+
+              <rect x="668" y="62" width="254" height="66" rx="14" fill="url(#g)" stroke="rgba(255,255,255,0.16)"/>
+              <text x="690" y="90" font-size="14" font-weight="650">Soft-equivariant model</text>
+              <text x="690" y="112" font-size="12" fill="rgba(255,255,255,0.70)">Robustness ↔ accuracy trade-off</text>
+
+              <path d="M 252 95 L 320 95" stroke="rgba(255,255,255,0.34)" stroke-width="2"/>
+              <path d="M 600 95 L 668 95" stroke="rgba(255,255,255,0.34)" stroke-width="2"/>
+              <path d="M 312 95 L 304 90 L 304 100 Z" fill="rgba(255,255,255,0.34)"/>
+              <path d="M 660 95 L 652 90 L 652 100 Z" fill="rgba(255,255,255,0.34)"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="code" aria-label="Core equation">
+<pre><code>W_projected = P(W)
+W_soft = softness · W + (1 - softness) · W_projected
+
+softness = 0.0  → strict equivariance
+softness = 1.0  → original pretrained weights</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="visuals">
+      <div class="container">
+        <h2>Visual demos (GIFs)</h2>
+        <p>
+          These examples show the smooth transition from equivariant to non-equivariant behavior as softness increases.
+          Rows matching indicates stronger equivariance; mismatches indicate symmetry breaking.
+        </p>
+
+        <div class="gallery" aria-label="ViT and ResNet GIF gallery">
+          <figure class="card">
+            <img class="figure" src="notebooks/figs/vit_softness_0.0.gif" alt="ViT: softness 0.0" loading="lazy" />
+            <figcaption class="figcap"><strong>ViT</strong> · softness = 0.0 (strict equivariance)</figcaption>
+          </figure>
+          <figure class="card">
+            <img class="figure" src="notebooks/figs/vit_softness_1.0.gif" alt="ViT: softness 1.0" loading="lazy" />
+            <figcaption class="figcap"><strong>ViT</strong> · softness = 1.0 (original model)</figcaption>
+          </figure>
+          <figure class="card">
+            <img class="figure" src="notebooks/figs/resnet_softness_0.0.gif" alt="ResNet: softness 0.0" loading="lazy" />
+            <figcaption class="figcap"><strong>ResNet</strong> · softness = 0.0 (filter all kernels &gt; 1×1)</figcaption>
+          </figure>
+          <figure class="card">
+            <img class="figure" src="notebooks/figs/resnet_softness_1.0.gif" alt="ResNet: softness 1.0" loading="lazy" />
+            <figcaption class="figcap"><strong>ResNet</strong> · softness = 1.0 (original model)</figcaption>
+          </figure>
+        </div>
+
+        <div class="gallery" aria-label="Scientific group demos">
+          <figure class="card">
+            <img class="figure" src="notebooks/figs/o5_equivariant_err.gif" alt="O(5) equivariant error demo" loading="lazy" />
+            <figcaption class="figcap"><strong>O(5)</strong> · high-dimensional equivariance visualization</figcaption>
+          </figure>
+          <figure class="card">
+            <img class="figure" src="notebooks/figs/so3_demo_readme.gif" alt="SO(3) demo" loading="lazy" />
+            <figcaption class="figcap"><strong>SO(3)</strong> · extensibility example for new groups</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="code">
+      <div class="container">
+        <h2>Code at a glance</h2>
+        <p>
+          The main implementation applies filters to pretrained layers at forward time.
+          See the GitHub repository for training scripts, model wrappers, and group-specific constraint implementations.
+        </p>
+
+        <div class="code" aria-label="Code snippet">
+<pre><code># Pseudocode sketch
+model = load_pretrained_backbone(...)
+
+# Wrap layers: Conv2d / Linear / Patch projection
+model = wrap_with_filtered_layers(model, group="C4", softness=0.6)
+
+# Run normally
+y = model(x)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="cite">
+      <div class="container">
+        <h2>Citation</h2>
+        <p>If you use this work, please cite:</p>
+        <div class="code" aria-label="BibTeX">
+<pre><code>@InProceedings{rahman2026tunable,
+  author    = {Rahman, Md Ashiqur and Hao, Lim Jun and Jiang, Jeremiah and Lim, Teck-Yian and Yeh, Raymond A},
+  title     = {Tunable Soft Equivariance with Guarantee},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2026}
+}</code></pre>
+        </div>
+
+        <div class="footer">
+          <div class="container" style="padding:0;">
+            <div class="small">
+              Links: <a href="https://arxiv.org/abs/2603.26657" target="_blank" rel="noreferrer">arXiv</a>
+              · <a href="https://arxiv.org/pdf/2603.26657" target="_blank" rel="noreferrer">PDF</a>
+              · <a href="https://github.com/ashiq24/soft-equivariance" target="_blank" rel="noreferrer">GitHub</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
