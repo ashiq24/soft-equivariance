@@ -238,8 +238,9 @@ wandb
 idea.md
 log.txt
 *.pt
+*.safetensors
 .cursor/
 idea.md
 data/*
 sweep_anvil.sh
-temp
+temp/

@@ -1,0 +1,29 @@
+{
+  "model_type": "soft_equivariant",
+  "model_arch": "filtered_dino2_seg",
+  "pretrained_model": "facebook/dinov2-base",
+  "num_labels": 21,
+  "n_rotations": 180,
+  "soft_thresholding": 0.9,
+  "soft_thresholding_pos": 1.0,
+  "group_type": "rotation",
+  "decomposition_method": "schur",
+  "filter_patch_embeddings": true,
+  "filter_attention_qkv": false,
+  "filter_attention_output": false,
+  "filter_mlp": false,
+  "attention_output_filter_list": [],
+  "soft_thresholding_attention_output": 0.1,
+  "preserve_norm": false,
+  "hard_mask": true,
+  "joint_decomposition": true,
+  "freeze_patch_embeddings": false,
+  "freeze_position_embeddings": false,
+  "ignore_index": 255,
+  "auto_map": {
+    "AutoConfig": "configuration_softeq.SoftEqConfig",
+    "AutoModel": "modeling_filtered_dinov2_seg.FilteredDino2Seg"
+  },
+  "transformers_version": "4.57.0",
+  "torch_dtype": "float32"
+}

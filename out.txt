@@ -1,0 +1,512 @@
+====================================================================
+  Automated HuggingFace Release Pipeline
+====================================================================
+  Config         : config/segmentation_ade.yaml [dinov3_seg]
+  Dataset        : ade20k
+  Model type     : filtered_dinov3_seg
+  Model arch     : filtered_dinov3_seg
+  Backbone       : facebook/dinov3-vitl16-pretrain-lvd1689m
+  Num labels     : 150
+  image_size     : 512
+  N rotations    : 4
+  Soft threshold : 0.8
+  Soft thresh pos: 0.8
+  Hard mask      : true
+  Group type     : rotation
+  Checkpoint     : ./logs/ade20k/wandb/run-20260510_012413-n6o3nw4j/files/best.pt
+  Safetensors dir: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8
+  Output dir     : hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8
+====================================================================
+
+Step 1/3: Converting .pt to safetensors...
+Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012413-n6o3nw4j/files/best.pt
+  Found state dict under key: "model_state_dict"
+  State dict has 421 parameter/buffer tensors.
+
+Saved: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8/model.safetensors  (1165.5 MB)
+Verification: loaded 421 tensors from temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8/model.safetensors
+
+Step 2/3: Packaging model for HuggingFace...
+Copied model.safetensors  (1165.5 MB)
+Written  config.json
+Copied   configuration_softeq.py
+Copied   modeling_filtered_vit.py
+Copied   modeling_filtered_dinov2.py
+Copied   modeling_filtered_dinov3.py
+Copied   modeling_filtered_vit_seg.py
+Copied   modeling_filtered_dinov2_seg.py
+Copied   modeling_filtered_dinov3_seg.py
+Copied   filtered_layers_vit.py
+Copied   filtered_layers_dinov2.py
+Copied   filtered_layers_dinov3.py
+Copied   softeq/
+
+Model folder ready: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8
+
+To upload to HuggingFace Hub:
+  huggingface-cli upload <your-username>/<repo-name> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8
+
+To load locally:
+  model = AutoModel.from_pretrained("hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8", trust_remote_code=True)
+
+Step 3/3: Verifying HF model matches original...
+====================================================================
+  Soft-Equivariant Model Release Verification
+  config     : config/segmentation_ade.yaml  [dinov3_seg]
+  model type : filtered_dinov3_seg
+  n_rot=4  soft=0.8  soft_pos=0.8
+====================================================================
+
+── Loading ORIGINAL model (codebase + .pt checkpoint) ─────────────
+  model type : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 4
+  soft       : 0.8
+  soft_pos   : 0.8
+  hard_mask  : True
+Initialising DINOv3 backbone from config only (random weights).
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: tensor(215) 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=0.8)...
+last_basis_idx and total basis: tensor(868) 1024
+  RoPE forward patched — coord smoothing active.
+FilteredDinoV3Seg created successfully.
+  Hidden size:      1024
+  Num labels:       150
+  Register tokens:  4
+
+  Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012413-n6o3nw4j/files/best.pt
+  Found state dict under key: "model_state_dict"
+  Loaded 421 tensors.
+
+── Loading HF model (packaged folder) ─────────────────────────────
+  Folder: /anvil/projects/x-cis250853/Projects/Public_release/soft-equivariance/hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8
+Loading DINOv3 segmentation backbone config from: facebook/dinov3-vitl16-pretrain-lvd1689m
+Applying soft-equivariant filters to DINOv3 backbone...
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: tensor(215) 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=0.8)...
+last_basis_idx and total basis: tensor(868) 1024
+  RoPE forward patched — coord smoothing active.
+  model_arch : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 4
+  soft       : 0.8
+  soft_pos   : 0.8
+
+── Weight comparison ───────────────────────────────────────────────
+
+── State-dict key comparison ───────────────────────────────────────
+  Original keys : 421
+  HF model keys : 421
+  Shared keys   : 421
+  ✓ Key sets and shapes match.
+
+── Forward-pass comparison ─────────────────────────────────────────
+  Using random input: shape [1, 3, 512, 512]  (seed=42)
+  Original — shape=[1, 150, 512, 512]  min=-6.6288  max=4.0024
+  HF model — shape=[1, 150, 512, 512]  min=-6.6288  max=4.0024
+  Max absolute diff : 0.0000e+00
+  Mean absolute diff: 0.0000e+00
+
+====================================================================
+  ✓ Max absolute logit difference: 0.0000e+00  [PASS — outputs are identical]
+====================================================================
+
+====================================================================
+  Release pipeline complete!
+  Model folder: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8
+
+  To upload:
+    huggingface-cli upload <username>/<repo> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.8
+====================================================================
+====================================================================
+  Automated HuggingFace Release Pipeline
+====================================================================
+  Config         : config/segmentation_ade.yaml [dinov3_seg]
+  Dataset        : ade20k
+  Model type     : filtered_dinov3_seg
+  Model arch     : filtered_dinov3_seg
+  Backbone       : facebook/dinov3-vitl16-pretrain-lvd1689m
+  Num labels     : 150
+  image_size     : 512
+  N rotations    : 4
+  Soft threshold : 0.4
+  Soft thresh pos: 0.4
+  Hard mask      : true
+  Group type     : rotation
+  Checkpoint     : ./logs/ade20k/wandb/run-20260510_012414-g8tiefn0/files/best.pt
+  Safetensors dir: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4
+  Output dir     : hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4
+====================================================================
+
+Step 1/3: Converting .pt to safetensors...
+Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012414-g8tiefn0/files/best.pt
+  Found state dict under key: "model_state_dict"
+  State dict has 421 parameter/buffer tensors.
+
+Saved: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4/model.safetensors  (1165.5 MB)
+Verification: loaded 421 tensors from temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4/model.safetensors
+
+Step 2/3: Packaging model for HuggingFace...
+Copied model.safetensors  (1165.5 MB)
+Written  config.json
+Copied   configuration_softeq.py
+Copied   modeling_filtered_vit.py
+Copied   modeling_filtered_dinov2.py
+Copied   modeling_filtered_dinov3.py
+Copied   modeling_filtered_vit_seg.py
+Copied   modeling_filtered_dinov2_seg.py
+Copied   modeling_filtered_dinov3_seg.py
+Copied   filtered_layers_vit.py
+Copied   filtered_layers_dinov2.py
+Copied   filtered_layers_dinov3.py
+Copied   softeq/
+
+Model folder ready: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4
+
+To upload to HuggingFace Hub:
+  huggingface-cli upload <your-username>/<repo-name> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4
+
+To load locally:
+  model = AutoModel.from_pretrained("hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4", trust_remote_code=True)
+
+Step 3/3: Verifying HF model matches original...
+====================================================================
+  Soft-Equivariant Model Release Verification
+  config     : config/segmentation_ade.yaml  [dinov3_seg]
+  model type : filtered_dinov3_seg
+  n_rot=4  soft=0.4  soft_pos=0.4
+====================================================================
+
+── Loading ORIGINAL model (codebase + .pt checkpoint) ─────────────
+  model type : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 4
+  soft       : 0.4
+  soft_pos   : 0.4
+  hard_mask  : True
+Initialising DINOv3 backbone from config only (random weights).
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: tensor(139) 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=0.4)...
+last_basis_idx and total basis: tensor(561) 1024
+  RoPE forward patched — coord smoothing active.
+FilteredDinoV3Seg created successfully.
+  Hidden size:      1024
+  Num labels:       150
+  Register tokens:  4
+
+  Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012414-g8tiefn0/files/best.pt
+  Found state dict under key: "model_state_dict"
+  Loaded 421 tensors.
+
+── Loading HF model (packaged folder) ─────────────────────────────
+  Folder: /anvil/projects/x-cis250853/Projects/Public_release/soft-equivariance/hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4
+Loading DINOv3 segmentation backbone config from: facebook/dinov3-vitl16-pretrain-lvd1689m
+Applying soft-equivariant filters to DINOv3 backbone...
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: tensor(139) 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=0.4)...
+last_basis_idx and total basis: tensor(561) 1024
+  RoPE forward patched — coord smoothing active.
+  model_arch : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 4
+  soft       : 0.4
+  soft_pos   : 0.4
+
+── Weight comparison ───────────────────────────────────────────────
+
+── State-dict key comparison ───────────────────────────────────────
+  Original keys : 421
+  HF model keys : 421
+  Shared keys   : 421
+  ✓ Key sets and shapes match.
+
+── Forward-pass comparison ─────────────────────────────────────────
+  Using random input: shape [1, 3, 512, 512]  (seed=42)
+  Original — shape=[1, 150, 512, 512]  min=-8.5834  max=6.7292
+  HF model — shape=[1, 150, 512, 512]  min=-8.5834  max=6.7292
+  Max absolute diff : 0.0000e+00
+  Mean absolute diff: 0.0000e+00
+
+====================================================================
+  ✓ Max absolute logit difference: 0.0000e+00  [PASS — outputs are identical]
+====================================================================
+
+====================================================================
+  Release pipeline complete!
+  Model folder: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4
+
+  To upload:
+    huggingface-cli upload <username>/<repo> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.4
+====================================================================
+====================================================================
+  Automated HuggingFace Release Pipeline
+====================================================================
+  Config         : config/segmentation_ade.yaml [dinov3_seg]
+  Dataset        : ade20k
+  Model type     : filtered_dinov3_seg
+  Model arch     : filtered_dinov3_seg
+  Backbone       : facebook/dinov3-vitl16-pretrain-lvd1689m
+  Num labels     : 150
+  image_size     : 512
+  N rotations    : 4
+  Soft threshold : 0.1
+  Soft thresh pos: 0.1
+  Hard mask      : true
+  Group type     : rotation
+  Checkpoint     : ./logs/ade20k/wandb/run-20260510_012400-ij53cvp0/files/best.pt
+  Safetensors dir: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1
+  Output dir     : hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1
+====================================================================
+
+Step 1/3: Converting .pt to safetensors...
+Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012400-ij53cvp0/files/best.pt
+  Found state dict under key: "model_state_dict"
+  State dict has 421 parameter/buffer tensors.
+
+Saved: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1/model.safetensors  (1165.5 MB)
+Verification: loaded 421 tensors from temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1/model.safetensors
+
+Step 2/3: Packaging model for HuggingFace...
+Copied model.safetensors  (1165.5 MB)
+Written  config.json
+Copied   configuration_softeq.py
+Copied   modeling_filtered_vit.py
+Copied   modeling_filtered_dinov2.py
+Copied   modeling_filtered_dinov3.py
+Copied   modeling_filtered_vit_seg.py
+Copied   modeling_filtered_dinov2_seg.py
+Copied   modeling_filtered_dinov3_seg.py
+Copied   filtered_layers_vit.py
+Copied   filtered_layers_dinov2.py
+Copied   filtered_layers_dinov3.py
+Copied   softeq/
+
+Model folder ready: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1
+
+To upload to HuggingFace Hub:
+  huggingface-cli upload <your-username>/<repo-name> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1
+
+To load locally:
+  model = AutoModel.from_pretrained("hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1", trust_remote_code=True)
+
+Step 3/3: Verifying HF model matches original...
+====================================================================
+  Soft-Equivariant Model Release Verification
+  config     : config/segmentation_ade.yaml  [dinov3_seg]
+  model type : filtered_dinov3_seg
+  n_rot=4  soft=0.1  soft_pos=0.1
+====================================================================
+
+── Loading ORIGINAL model (codebase + .pt checkpoint) ─────────────
+  model type : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 4
+  soft       : 0.1
+  soft_pos   : 0.1
+  hard_mask  : True
+Initialising DINOv3 backbone from config only (random weights).
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: tensor(82) 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=0.1)...
+last_basis_idx and total basis: tensor(331) 1024
+  RoPE forward patched — coord smoothing active.
+FilteredDinoV3Seg created successfully.
+  Hidden size:      1024
+  Num labels:       150
+  Register tokens:  4
+
+  Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012400-ij53cvp0/files/best.pt
+  Found state dict under key: "model_state_dict"
+  Loaded 421 tensors.
+
+── Loading HF model (packaged folder) ─────────────────────────────
+  Folder: /anvil/projects/x-cis250853/Projects/Public_release/soft-equivariance/hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1
+Loading DINOv3 segmentation backbone config from: facebook/dinov3-vitl16-pretrain-lvd1689m
+Applying soft-equivariant filters to DINOv3 backbone...
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: tensor(82) 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=0.1)...
+last_basis_idx and total basis: tensor(331) 1024
+  RoPE forward patched — coord smoothing active.
+  model_arch : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 4
+  soft       : 0.1
+  soft_pos   : 0.1
+
+── Weight comparison ───────────────────────────────────────────────
+
+── State-dict key comparison ───────────────────────────────────────
+  Original keys : 421
+  HF model keys : 421
+  Shared keys   : 421
+  ✓ Key sets and shapes match.
+
+── Forward-pass comparison ─────────────────────────────────────────
+  Using random input: shape [1, 3, 512, 512]  (seed=42)
+  Original — shape=[1, 150, 512, 512]  min=-8.9404  max=5.8586
+  HF model — shape=[1, 150, 512, 512]  min=-8.9404  max=5.8586
+  Max absolute diff : 0.0000e+00
+  Mean absolute diff: 0.0000e+00
+
+====================================================================
+  ✓ Max absolute logit difference: 0.0000e+00  [PASS — outputs are identical]
+====================================================================
+
+====================================================================
+  Release pipeline complete!
+  Model folder: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1
+
+  To upload:
+    huggingface-cli upload <username>/<repo> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c4-s0.1
+====================================================================
+====================================================================
+  Automated HuggingFace Release Pipeline
+====================================================================
+  Config         : config/segmentation_ade.yaml [dinov3_seg]
+  Dataset        : ade20k
+  Model type     : filtered_dinov3_seg
+  Model arch     : filtered_dinov3_seg
+  Backbone       : facebook/dinov3-vitl16-pretrain-lvd1689m
+  Num labels     : 150
+  image_size     : 512
+  N rotations    : 360
+  Soft threshold : 0.8
+  Soft thresh pos: 1.0
+  Hard mask      : true
+  Group type     : rotation
+  Checkpoint     : ./logs/ade20k/wandb/run-20260510_012413-zzhwacvo/files/best.pt
+  Safetensors dir: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0
+  Output dir     : hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0
+====================================================================
+
+Step 1/3: Converting .pt to safetensors...
+Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012413-zzhwacvo/files/best.pt
+  Found state dict under key: "model_state_dict"
+  State dict has 421 parameter/buffer tensors.
+
+Saved: temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0/model.safetensors  (1165.5 MB)
+Verification: loaded 421 tensors from temp/converted_filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0/model.safetensors
+
+Step 2/3: Packaging model for HuggingFace...
+Copied model.safetensors  (1165.5 MB)
+Written  config.json
+Copied   configuration_softeq.py
+Copied   modeling_filtered_vit.py
+Copied   modeling_filtered_dinov2.py
+Copied   modeling_filtered_dinov3.py
+Copied   modeling_filtered_vit_seg.py
+Copied   modeling_filtered_dinov2_seg.py
+Copied   modeling_filtered_dinov3_seg.py
+Copied   filtered_layers_vit.py
+Copied   filtered_layers_dinov2.py
+Copied   filtered_layers_dinov3.py
+Copied   softeq/
+
+Model folder ready: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0
+
+To upload to HuggingFace Hub:
+  huggingface-cli upload <your-username>/<repo-name> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0
+
+To load locally:
+  model = AutoModel.from_pretrained("hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0", trust_remote_code=True)
+
+Step 3/3: Verifying HF model matches original...
+====================================================================
+  Soft-Equivariant Model Release Verification
+  config     : config/segmentation_ade.yaml  [dinov3_seg]
+  model type : filtered_dinov3_seg
+  n_rot=360  soft=0.8  soft_pos=1.0
+====================================================================
+
+── Loading ORIGINAL model (codebase + .pt checkpoint) ─────────────
+  model type : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 360
+  soft       : 0.8
+  soft_pos   : 1.0
+  hard_mask  : True
+Initialising DINOv3 backbone from config only (random weights).
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: 204 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=1.0)...
+last_basis_idx and total basis: 1023 1024
+  RoPE forward patched — coord smoothing active.
+FilteredDinoV3Seg created successfully.
+  Hidden size:      1024
+  Num labels:       150
+  Register tokens:  4
+
+  Loading checkpoint: ./logs/ade20k/wandb/run-20260510_012413-zzhwacvo/files/best.pt
+  Found state dict under key: "model_state_dict"
+  Loaded 421 tensors.
+
+── Loading HF model (packaged folder) ─────────────────────────────
+  Folder: /anvil/projects/x-cis250853/Projects/Public_release/soft-equivariance/hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0
+Loading DINOv3 segmentation backbone config from: facebook/dinov3-vitl16-pretrain-lvd1689m
+Applying soft-equivariant filters to DINOv3 backbone...
+  [monkeypatch] Fine-tuning image_size=512 differs from config.image_size=224. Building coord filter for 512x512 grid.
+Filtering DINOv3 patch embedding Conv2d...
+last_basis_idx and total basis: 204 256
+  Conv2d kernel (16x16) wrapped with FilteredConv2d.
+Filtering DINOv3 RoPE coordinate grid (32x32, softness=1.0)...
+last_basis_idx and total basis: 1023 1024
+  RoPE forward patched — coord smoothing active.
+  model_arch : filtered_dinov3_seg
+  backbone   : facebook/dinov3-vitl16-pretrain-lvd1689m
+  num_labels : 150
+  n_rotations: 360
+  soft       : 0.8
+  soft_pos   : 1.0
+
+── Weight comparison ───────────────────────────────────────────────
+
+── State-dict key comparison ───────────────────────────────────────
+  Original keys : 421
+  HF model keys : 421
+  Shared keys   : 421
+  ✓ Key sets and shapes match.
+
+── Forward-pass comparison ─────────────────────────────────────────
+  Using random input: shape [1, 3, 512, 512]  (seed=42)
+  Original — shape=[1, 150, 512, 512]  min=-6.0986  max=4.1071
+  HF model — shape=[1, 150, 512, 512]  min=-6.0986  max=4.1071
+  Max absolute diff : 0.0000e+00
+  Mean absolute diff: 0.0000e+00
+
+====================================================================
+  ✓ Max absolute logit difference: 0.0000e+00  [PASS — outputs are identical]
+====================================================================
+
+====================================================================
+  Release pipeline complete!
+  Model folder: hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0
+
+  To upload:
+    huggingface-cli upload <username>/<repo> hugging_face_releases/filtered-dinov3-vitl16-pretrain-lvd1689m-ade-seg-c360-s1.0
+====================================================================
