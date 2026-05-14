@@ -1,217 +1,783 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tunable Soft Equivariance with Guarantee (CVPR 2026)</title>
-  <meta name="description" content="Soft equivariance: a forward-time weight filtering method that continuously interpolates between strict equivariance and the original pretrained model via a single softness parameter." />
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Tunable Soft Equivariance with Guarantee — CVPR 2026</title>
+  <meta name="description" content="A framework for projecting pretrained model weights into the equivariant subspace, with a provable bound on the induced symmetry error."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #faf8f4;
+      --surf:     rgba(0,0,0,.03);
+      --surf2:    rgba(0,0,0,.055);
+      --border:   rgba(0,0,0,.09);
+      --border2:  rgba(0,0,0,.16);
+      --text:     #1c1917;
+      --muted:    #6e6157;
+      --muted2:   #a8998f;
+      --accent:   #d97757;
+      --accent2:  #b05428;
+      --gold:     rgba(200,100,40,.85);
+      --maxw:     1100px;
+      --r:        14px;
+      --rsm:      9px;
+      --code-bg:  #2c201a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 5% -10%, rgba(217,119,87,.07) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 95% 5%,  rgba(185,80,40,.04)  0%, transparent 45%);
+    }
+    a { text-decoration: none; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ── Nav ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(14px) saturate(1.5);
+      -webkit-backdrop-filter: blur(14px) saturate(1.5);
+      background: rgba(250,248,244,.90); border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-title { font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: var(--text); }
+    .chip { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+    .chip-blue { background: rgba(217,119,87,.12); border: 1px solid rgba(217,119,87,.28); color: var(--accent); }
+    .nav-links { display: flex; gap: 2px; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--muted); padding: 6px 11px; border-radius: 8px; transition: color 140ms, background 140ms; }
+    .nav-links a:hover { color: var(--text); background: var(--surf2); }
+
+    /* ── Hero ── */
+    .hero { padding: 72px 0 56px; position: relative; z-index: 1; }
+    .hero-badges { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+    .arxiv-tag { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted2); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surf); }
+    h1 { font-size: clamp(34px,5.5vw,60px); font-weight: 800; letter-spacing: -.035em; line-height: 1.04; max-width: 13ch; margin-bottom: 18px; }
+    h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub { font-size: 16px; color: var(--muted); line-height: 1.7; margin-bottom: 22px; }
+    .authors { font-size: 13px; line-height: 1.8; color: var(--muted2); margin-bottom: 26px; }
+    .authors strong { color: var(--muted); font-weight: 600; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 52px; align-items: center; }
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--rsm); font-size: 13px; font-weight: 600; letter-spacing: -.01em; border: 1px solid var(--border); background: var(--surf2); color: var(--text); transition: transform 120ms, border-color 120ms, background 120ms; }
+    .btn:hover { transform: translateY(-2px); border-color: var(--border2); background: rgba(0,0,0,.07); }
+    .btn-primary { background: linear-gradient(135deg, #d97757, #c06030); border-color: #d97757; color: #fff; }
+    .btn-primary:hover { background: linear-gradient(135deg, #e0865e, #cc6b3a); border-color: #c06030; }
+    .hf-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 12px; border-radius: 999px; border: 1px dashed rgba(185,80,40,.35); background: rgba(217,119,87,.07); color: var(--accent2); }
+    .hero-fig { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); box-shadow: 0 14px 48px rgba(0,0,0,.10); background: #fff; }
+    .hero-fig img { width: 100%; height: auto; display: block; }
+    .hero-fig figcaption { background: #fff; color: #333; padding: 12px 20px 14px; font-size: 13px; line-height: 1.6; border-top: 1px solid rgba(0,0,0,.08); }
+    .hero-fig figcaption strong { color: #111; }
+
+    /* ── Sections ── */
+    section { padding: 68px 0; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+    .sec-label { font-size: 11px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    h2 { font-size: clamp(22px,3vw,34px); font-weight: 800; letter-spacing: -.025em; line-height: 1.10; margin-bottom: 14px; }
+    h3 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 8px; }
+    p { color: var(--muted); font-size: 15px; line-height: 1.72; }
+    p + p { margin-top: 12px; }
+    strong { color: var(--text); font-weight: 600; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: .875em; color: var(--accent2); background: rgba(185,80,40,.10); padding: 2px 5px; border-radius: 4px; }
+    .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+    @media (max-width: 760px) { .cols2 { grid-template-columns: 1fr; gap: 28px; } }
+    .kpis { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    .kpi { flex: 1; min-width: 140px; padding: 14px 16px; border-radius: var(--rsm); border: 1px solid var(--border); background: var(--surf); }
+    .kpi-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 5px; }
+    .kpi-val { font-size: 14px; font-weight: 600; color: var(--text); }
+    .bullet-list { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .bullet-list li { margin: 6px 0; }
+
+    /* equation block — dark for readability */
+    .eq { margin-top: 20px; border-radius: var(--r); border: 1px solid rgba(0,0,0,.18); background: var(--code-bg); overflow: hidden; }
+    .eq-head { padding: 9px 16px; border-bottom: 1px solid rgba(255,255,255,.08); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,.38); background: rgba(255,255,255,.03); }
+    .eq pre { margin: 0; padding: 18px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.85; color: rgba(255,255,255,.82); overflow-x: auto; }
+    .c { color: rgba(255,255,255,.32); }
+    .kw { color: #ffb07a; font-weight: 500; }
+    .val { color: #ffd4a8; }
+
+    /* method callouts */
+    .method-callouts { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .mcall { display: flex; align-items: flex-start; gap: 12px; padding: 13px 15px; border-radius: var(--rsm); border: 1px solid var(--border); background: var(--surf); }
+    .mcall-icon { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: rgba(217,119,87,.12); border: 1px solid rgba(217,119,87,.22); color: var(--accent); }
+    .mcall-body { flex: 1; }
+    .mcall-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; color: var(--text); }
+    .mcall-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+    /* step pills */
+    .steps { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: var(--rsm); border: 1px solid var(--border); background: var(--surf); }
+    .step-num { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: rgba(217,119,87,.14); border: 1px solid rgba(217,119,87,.28); color: var(--accent); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .step-body { flex: 1; }
+    .step-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .step-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* ── Demo ── */
+    .demo-blurb { margin-bottom: 28px; }
+    .demo-callout { margin-top: 10px; padding: 12px 16px; border-radius: var(--rsm); border: 1px solid rgba(217,119,87,.22); background: rgba(217,119,87,.06); font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .demo-callout strong { color: var(--accent); }
+    .demo-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 760px) { .demo-cols { grid-template-columns: 1fr; } }
+    .demo-card { border: 1px solid var(--border); border-radius: var(--r); background: var(--surf); overflow: hidden; }
+    .demo-card-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+    .demo-card-title { font-size: 13px; font-weight: 700; }
+    .gif-wrap { position: relative; background: #f0ebe4; min-height: 120px; }
+    .gif-wrap img { width: 100%; height: auto; display: none; }
+    .gif-wrap img.active { display: block; }
+    .demo-card-body { padding: 14px 14px 10px; }
+    .demo-cap { font-size: 12px; color: var(--muted2); line-height: 1.5; margin-bottom: 14px; }
+
+    /* per-card mini slider */
+    .mini-slider-wrap { position: relative; }
+    .mini-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .mini-lbl { font-size: 11px; font-weight: 600; color: var(--muted); }
+    .mini-val { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; color: var(--accent); }
+    .mini-track { position: relative; height: 20px; display: flex; align-items: center; }
+    .mini-track-bg { position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; background: var(--border2); }
+    .mini-track-fg { position: absolute; left: 0; height: 4px; border-radius: 2px; background: var(--accent); pointer-events: none; transition: width 100ms; }
+    input.mini-input { -webkit-appearance: none; appearance: none; position: relative; z-index: 2; width: 100%; height: 4px; border-radius: 2px; background: transparent; outline: none; cursor: pointer; }
+    input.mini-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); box-shadow: 0 0 0 2px var(--accent); cursor: pointer; }
+    input.mini-input::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); box-shadow: 0 0 0 2px var(--accent); cursor: pointer; }
+    .mini-marks { display: flex; justify-content: space-between; margin-top: 5px; }
+    .mini-mark { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--muted2); transition: color 120ms; }
+    .mini-mark.on { color: var(--accent); font-weight: 600; }
+    .mini-desc { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.55; min-height: 38px; }
+    .mini-desc strong { color: var(--accent); }
+
+    /* ── Scientific groups tabs ── */
+    .group-tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+    .gtab { padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surf); color: var(--muted); transition: all 140ms; }
+    .gtab.active { background: rgba(217,119,87,.12); border-color: rgba(217,119,87,.30); color: var(--accent); }
+    .gtab:hover:not(.active) { background: var(--surf2); color: var(--text); }
+    .group-panel { display: none; }
+    .group-panel.active { display: block; }
+
+    /* carousel */
+    .carousel { position: relative; }
+    .carousel-track { overflow: hidden; }
+    .carousel-slide { display: none; }
+    .carousel-slide.active { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 760px) { .carousel-slide.active { grid-template-columns: 1fr; } }
+    .carousel-nav { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .carousel-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--surf2); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 120ms; font-size: 14px; }
+    .carousel-btn:hover { border-color: var(--border2); color: var(--text); background: rgba(0,0,0,.08); }
+    .carousel-btn:disabled { opacity: .3; cursor: default; }
+    .carousel-dots { display: flex; gap: 6px; }
+    .cdot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background 140ms; }
+    .cdot.on { background: var(--accent); }
+
+    /* sci card */
+    .sci-card { border: 1px solid var(--border); border-radius: var(--r); background: var(--surf); overflow: hidden; }
+    .sci-head { display: flex; align-items: baseline; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .sci-group { font-size: 15px; font-weight: 700; }
+    .sci-type { font-size: 12px; color: var(--muted); }
+    .sci-card img { width: 100%; height: auto; display: block; background: #f0ebe4; }
+    .sci-desc { padding: 10px 16px 12px; font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+    /* code block — dark */
+    .codeblock { border: 1px solid rgba(0,0,0,.18); border-radius: var(--r); background: var(--code-bg); overflow: hidden; margin-top: 20px; }
+    .codeblock-head { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px; border-bottom: 1px solid rgba(255,255,255,.08); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,.38); background: rgba(255,255,255,.03); }
+    .codeblock pre { margin: 0; padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.65; color: rgba(255,255,255,.82); }
+
+    /* citation */
+    .cite-block { border: 1px solid rgba(0,0,0,.18); border-radius: var(--r); background: var(--code-bg); overflow: hidden; margin-top: 20px; }
+    .cite-block pre { margin: 0; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.75; color: rgba(255,255,255,.58); overflow-x: auto; }
+
+    /* footer */
+    .footer { border-top: 1px solid var(--border); padding: 28px 0 44px; color: var(--muted2); font-size: 13px; position: relative; z-index: 1; }
+    .footer-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-links { display: flex; gap: 14px; }
+    .footer-links a { color: var(--muted); transition: color 140ms; }
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .hero { padding: 48px 0 36px; }
+      section { padding: 48px 0; }
+      .nav-links { display: none; }
+    }
+  </style>
 </head>
 <body>
-  <header class="nav">
-    <div class="container nav-inner">
-      <div class="brand">
-        <div class="title">Soft Equivariance</div>
-        <div class="tag">CVPR 2026</div>
-      </div>
-      <nav class="nav-links" aria-label="Section navigation">
-        <a href="#overview">Overview</a>
-        <a href="#method">Method</a>
-        <a href="#visuals">Visuals</a>
-        <a href="#code">Code</a>
-        <a href="#cite">Cite</a>
-      </nav>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="nav-brand">
+      <span class="nav-title">Soft Equivariance</span>
+      <span class="chip chip-blue">CVPR 2026</span>
     </div>
-  </header>
+    <nav class="nav-links">
+      <a href="#problem">Overview</a>
+      <a href="#method">Method</a>
+      <a href="#demo">Demo</a>
+      <a href="#groups">Beyond 2D</a>
+      <a href="#code">Code</a>
+      <a href="#cite">Cite</a>
+    </nav>
+  </div>
+</header>
 
-  <main>
-    <section class="hero">
-      <div class="container hero-grid">
-        <div>
-          <div class="h-eyebrow">
-            <span>Paper</span>
-            <span class="small">arXiv:2603.26657</span>
-          </div>
-          <h1 class="h-title">Tunable Soft Equivariance with Guarantee</h1>
-          <p class="h-sub">
-            A lightweight mechanism that continuously interpolates between strict group equivariance and the original pretrained model,
-            controlled by a single <strong>softness</strong> parameter.
-            Implemented as forward-time weight filtering for modern vision backbones (ViT / ResNet / DINO / SegFormer) and scientific equivariant MLPs.
-          </p>
-          <div class="cta" role="group" aria-label="Primary links">
-            <a class="btn primary" href="https://arxiv.org/pdf/2603.26657" target="_blank" rel="noreferrer">Read the paper →</a>
-            <a class="btn" href="https://github.com/ashiq24/soft-equivariance" target="_blank" rel="noreferrer">GitHub repo →</a>
-          </div>
+<main>
 
-          <div class="section" id="overview">
-            <h2>What is soft equivariance?</h2>
-            <p>
-              Many pretrained models break under group actions (e.g., rotations), while strict equivariance can be too restrictive.
-              Soft equivariance enforces symmetry <em>gradually</em> by projecting weights to invariant/equivariant subspaces and interpolating
-              back to the original weights with a single knob: <code>softness ∈ [0, 1]</code>.
-            </p>
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-badges">
+      <span class="chip chip-blue">CVPR 2026</span>
+    </div>
 
-            <div class="grid-3" aria-label="Key points">
-              <div class="kpi">
-                <div class="k">Single parameter</div>
-                <div class="v">softness: 0.0 → equivariant, 1.0 → original</div>
+    <h1>Tunable <em>Soft</em> Equivariance with Guarantee</h1>
+
+    <p class="hero-sub">
+      A framework for injecting tunable symmetry into any pretrained model — without adding
+      learned parameters — by projecting weights through soft equivariant filters
+      controlled by a single scalar <strong>b</strong>.
+    </p>
+
+    <div class="authors">
+      <strong>Md Ashiqur Rahman &nbsp;·&nbsp; Lim Jun Hao &nbsp;·&nbsp; Jeremiah Jiang &nbsp;·&nbsp; Teck-Yian Lim &nbsp;·&nbsp; Raymond A. Yeh</strong>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://arxiv.org/pdf/2603.26657" target="_blank" rel="noreferrer">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        Read the Paper
+      </a>
+      <a class="btn" href="https://github.com/ashiq24/soft-equivariance" target="_blank" rel="noreferrer">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        GitHub
+      </a>
+      <a class="hf-pill" href="https://huggingface.co/collections/ashiq24/soft-equivariant-vision-foundation-models" target="_blank" rel="noreferrer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" opacity=".8"><path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z"/></svg>
+        HuggingFace collection
+      </a>
+    </div>
+
+    <figure class="hero-fig">
+      <img src="notebooks/figs/soft_eq_fig.png"
+           alt="Five softness levels visualized: convolution kernels, feature maps of two rotated inputs, and equivariance error heatmaps"/>
+      <figcaption>
+        <strong>Each column is one softness value</strong> <em>b</em>, from strict equivariance (b&nbsp;=&nbsp;0, left) to the original pretrained model (b&nbsp;=&nbsp;1, right).
+        Rows show convolution kernels, final feature maps for two rotated versions of the same image, and the pointwise equivariance error (blue&nbsp;=&nbsp;low, red&nbsp;=&nbsp;high).
+        At b&nbsp;=&nbsp;0 the feature maps are nearly identical and the error is negligible; both degrade continuously and predictably as b increases.
+      </figcaption>
+    </figure>
+  </div>
+</div>
+
+<!-- ═══ PROBLEM + INSIGHT ═══ -->
+<section id="problem">
+  <div class="wrap">
+    <div class="cols2">
+
+      <div>
+        <div class="sec-label">The Problem</div>
+        <h2>Two extremes, both costly</h2>
+        <p>
+          Pretrained vision and scientific models are powerful but symmetry-unaware —
+          rotate the input and the output changes unpredictably.
+          <strong>Strict equivariance</strong> fixes this but often forces training from scratch,
+          discarding pretrained representations and over-constraining the model
+          in settings where only approximate symmetry holds.
+        </p>
+        <p>
+          Neither extreme is satisfactory: one ignores symmetry entirely;
+          the other enforces it too rigidly at too high a cost.
+        </p>
+      </div>
+
+      <div>
+        <div class="sec-label">Our Solution</div>
+        <h2>Symmetry as a dial, not a switch</h2>
+        <ul class="bullet-list">
+          <li>Project weights via <em>soft equivariant filters</em>.</li>
+          <li>Single scalar <strong>b</strong> tunes equivariance level with provable bound.</li>
+        </ul>
+        <div class="sec-label" style="margin-top:18px;">Contributions</div>
+        <ul class="bullet-list">
+          <li>General framework: plug-in soft equivariance for any model.</li>
+          <li>Theoretical bounds on equivariance error controlled by <strong>b</strong>.</li>
+          <li>Validated on ViT, DINOv2, ResNet, SegFormer; improves off-the-shelf models.</li>
+        </ul>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label">New parameters</div><div class="kpi-val">None</div></div>
+          <div class="kpi"><div class="kpi-label">Control range</div><div class="kpi-val">b ∈ [0, 1]</div></div>
+          <div class="kpi"><div class="kpi-label">Groups supported</div><div class="kpi-val">C<sub>n</sub>, SO(3), O(5), …</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ METHOD ═══ -->
+<section id="method">
+  <div class="wrap">
+    <div class="sec-label">Method</div>
+    <h2>Project into subspaces with controllable equivariance error</h2>
+
+    <div class="cols2" style="margin-top:6px;">
+
+      <div>
+        <p>
+          For a linear map <code>W</code> with input/output group representations
+          <code>ρ<sub>X</sub></code> and <code>ρ<sub>Y</sub></code>, the equivariance condition
+          <code>ρ<sub>Y</sub>(g)W = Wρ<sub>X</sub>(g)</code> defines a <strong>linear subspace</strong>
+          of weight space. The projector <code>P(W)</code> is the orthogonal projection onto
+          this subspace.
+        </p>
+
+        <div class="eq">
+            <div class="eq-head">equivariant filter — exact formula</div>
+            <pre><span class="c"># Equivariance constraint:</span>
+      <span class="kw">ρ_Y</span>(g) W  =  W <span class="kw">ρ_X</span>(g)
+
+      <span class="c"># 1. Build Kronecker constraint matrix L:</span>
+      L  =  <span class="kw">dρ_X</span><sup>ᵀ</sup> ⊗ I<sub>d′</sub>  −  I<sub>d</sub> ⊗ <span class="kw">dρ_Y</span>
+      L · vec(W)  =  0   <span class="c"># equivariant subspace</span>
+
+      <span class="c"># 2. Project with cut-off b:</span>
+      keep basis vectors with σ<sub>i</sub> &lt; <span class="val">b</span>  <span class="c">(smaller b ⇒ stricter equivariance)</span></pre>
+        </div>
+
+        <p style="margin-top:14px;">
+          The equivariance error is <strong>provably bounded</strong> and controlled by <em>b</em>,
+          providing a formal guarantee at any operating point.
+        </p>
+
+        <div class="method-callouts" style="margin-top:18px;">
+          <div class="mcall">
+            <div class="mcall-icon">∂</div>
+            <div class="mcall-body">
+              <div class="mcall-title">Invariant filter — SVD cut-off</div>
+              <div class="mcall-desc">
+                For scalar outputs <code>y = wᵀx</code>, decompose the Lie-algebra action
+                <code>dρ(A) = UΣVᵀ</code> and keep basis vectors with <code>σ<sub>i</sub> &lt; b</code>.
+                The filter <code>B<sub>inv</sub></code> projects into low-sensitivity directions.
               </div>
-              <div class="kpi">
-                <div class="k">Forward-time filtering</div>
-                <div class="v">No architecture change; wrap existing layers</div>
+            </div>
+          </div>
+          <div class="mcall">
+            <div class="mcall-icon">⊕</div>
+            <div class="mcall-body">
+              <div class="mcall-title">Equivariant filter — vector case</div>
+              <div class="mcall-desc">
+                For <code>y = Wx</code>, form the operator
+                <code>L = (dρ<sub>X</sub><sup>ᵀ</sup> ⊗ I − I ⊗ dρ<sub>Y</sub>)</code> and project
+                <code>vec(W) = B<sub>eq</sub>θ</code> using the <code>σ<sub>i</sub> &lt; b</code> subspace.
+                This guarantees bounded equivariance deviation.
               </div>
-              <div class="kpi">
-                <div class="k">Broad coverage</div>
-                <div class="v">Vision + scientific groups (C4, SO(3), O(5), …)</div>
+            </div>
+          </div>
+          <div class="mcall">
+            <div class="mcall-icon">Δ</div>
+            <div class="mcall-body">
+              <div class="mcall-title">Fast Schur filter — scalable</div>
+              <div class="mcall-desc">
+                A Schur decomposition block-diagonalizes <code>dρ</code>, enabling blockwise
+                constraints (e.g., 2×2 rotation blocks) and a fast projection.
+                Complexity improves to <strong>O(max(d,&nbsp;d')³)</strong> vs.
+                <strong>O((d·d')³)</strong> for naive SVD.
               </div>
             </div>
           </div>
         </div>
-
-        <figure class="card" aria-label="Soft equivariance overview figure">
-          <img class="figure" src="notebooks/figs/soft_eq_fig.png" alt="Soft equivariance overview: equivariant to non-equivariant spectrum" loading="eager" />
-          <figcaption class="figcap">
-            <strong>Overview.</strong> Soft equivariance smoothly interpolates between strict equivariance (softness=0.0) and the original weights (softness=1.0).
-          </figcaption>
-        </figure>
       </div>
-    </section>
 
-    <section class="section" id="method">
-      <div class="container">
-        <h2>How it works (schema)</h2>
-        <p>
-          Soft equivariance is applied at forward time by filtering (projecting) pretrained weights to invariant/equivariant subspaces,
-          then interpolating between the projected and original weights.
-        </p>
-
-        <div class="schema" role="img" aria-label="Method schema diagram">
-          <svg viewBox="0 0 980 190" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#7aa2ff" stop-opacity="0.35"/>
-                <stop offset="1" stop-color="#9ee7ff" stop-opacity="0.12"/>
-              </linearGradient>
-            </defs>
-            <rect x="14" y="16" width="952" height="158" rx="18" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.14)"/>
-
-            <g font-family="ui-sans-serif, system-ui" fill="rgba(255,255,255,0.92)">
-              <rect x="42" y="62" width="210" height="66" rx="14" fill="url(#g)" stroke="rgba(255,255,255,0.16)"/>
-              <text x="62" y="90" font-size="14" font-weight="650">Pretrained model</text>
-              <text x="62" y="112" font-size="12" fill="rgba(255,255,255,0.70)">ViT / ResNet / DINO / …</text>
-
-              <rect x="320" y="50" width="280" height="90" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.16)"/>
-              <text x="342" y="78" font-size="14" font-weight="650">Forward-time filtering</text>
-              <text x="342" y="100" font-size="12" fill="rgba(255,255,255,0.70)">Project weights to equivariant / invariant subspaces</text>
-              <text x="342" y="120" font-size="12" fill="rgba(255,255,255,0.70)">Interpolate with softness ∈ [0,1]</text>
-
-              <rect x="668" y="62" width="254" height="66" rx="14" fill="url(#g)" stroke="rgba(255,255,255,0.16)"/>
-              <text x="690" y="90" font-size="14" font-weight="650">Soft-equivariant model</text>
-              <text x="690" y="112" font-size="12" fill="rgba(255,255,255,0.70)">Robustness ↔ accuracy trade-off</text>
-
-              <path d="M 252 95 L 320 95" stroke="rgba(255,255,255,0.34)" stroke-width="2"/>
-              <path d="M 600 95 L 668 95" stroke="rgba(255,255,255,0.34)" stroke-width="2"/>
-              <path d="M 312 95 L 304 90 L 304 100 Z" fill="rgba(255,255,255,0.34)"/>
-              <path d="M 660 95 L 652 90 L 652 100 Z" fill="rgba(255,255,255,0.34)"/>
-            </g>
-          </svg>
-        </div>
-
-        <div class="code" aria-label="Core equation">
-<pre><code>W_projected = P(W)
-W_soft = softness · W + (1 - softness) · W_projected
-
-softness = 0.0  → strict equivariance
-softness = 1.0  → original pretrained weights</code></pre>
+      <div>
+        <p>The same recipe applies across architectures and groups:</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Load pretrained backbone</div>
+              <div class="step-desc">ViT, ResNet, DINOv2, SegFormer, equivariant MLP — any model with Conv2d or Linear layers.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Wrap target layers</div>
+              <div class="step-desc">Wrap target modules with soft equivariant filters (<code>FilteredConv2d</code>, <code>FilteredLinear</code>). Projectors are computed once from the group structure.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Set <em>b</em>, optionally fine-tune</div>
+              <div class="step-desc">Choose <code>b ∈ [0, 1]</code> to fix the symmetry level. Optionally fine-tune with <em>b</em> held fixed to recover task performance at the chosen operating point.</div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section class="section" id="visuals">
-      <div class="container">
-        <h2>Visual demos (GIFs)</h2>
-        <p>
-          These examples show the smooth transition from equivariant to non-equivariant behavior as softness increases.
-          Rows matching indicates stronger equivariance; mismatches indicate symmetry breaking.
-        </p>
+    </div>
+  </div>
+</section>
 
-        <div class="gallery" aria-label="ViT and ResNet GIF gallery">
-          <figure class="card">
-            <img class="figure" src="notebooks/figs/vit_softness_0.0.gif" alt="ViT: softness 0.0" loading="lazy" />
-            <figcaption class="figcap"><strong>ViT</strong> · softness = 0.0 (strict equivariance)</figcaption>
-          </figure>
-          <figure class="card">
-            <img class="figure" src="notebooks/figs/vit_softness_1.0.gif" alt="ViT: softness 1.0" loading="lazy" />
-            <figcaption class="figcap"><strong>ViT</strong> · softness = 1.0 (original model)</figcaption>
-          </figure>
-          <figure class="card">
-            <img class="figure" src="notebooks/figs/resnet_softness_0.0.gif" alt="ResNet: softness 0.0" loading="lazy" />
-            <figcaption class="figcap"><strong>ResNet</strong> · softness = 0.0 (filter all kernels &gt; 1×1)</figcaption>
-          </figure>
-          <figure class="card">
-            <img class="figure" src="notebooks/figs/resnet_softness_1.0.gif" alt="ResNet: softness 1.0" loading="lazy" />
-            <figcaption class="figcap"><strong>ResNet</strong> · softness = 1.0 (original model)</figcaption>
-          </figure>
+<!-- ═══ DEMO ═══ -->
+<section id="demo">
+  <div class="wrap">
+    <div class="sec-label">Interactive Demo</div>
+    <h2>Drag each slider — watch the symmetry change</h2>
+
+    <div class="demo-blurb">
+      <p>
+        Each animation sweeps the input image through a full 360° rotation.
+        The top row shows <code>f<sub>b</sub>(R<sub>θ</sub>x)</code> — features of the
+        <em>rotated</em> input. The bottom row shows <code>R<sub>θ</sub><sup>−1</sup>f<sub>b</sub>(x)</code>
+        — the inverse rotation applied to features of the <em>original</em> input.
+        The bottom-left error map shows their discrepancy.
+      </p>
+      <div class="demo-callout">
+        <strong>Rows match exactly&nbsp;→ equivariant.&nbsp;&nbsp;Rows diverge&nbsp;→ symmetry broken.</strong>
+        The two backbones have independent sliders — compare how each architecture
+        responds to the same softness level.
+      </div>
+    </div>
+
+    <div class="demo-cols">
+
+      <!-- ViT -->
+      <div class="demo-card">
+        <div class="demo-card-head">
+          <span class="demo-card-title">Vision Transformer (ViT)</span>
         </div>
-
-        <div class="gallery" aria-label="Scientific group demos">
-          <figure class="card">
-            <img class="figure" src="notebooks/figs/o5_equivariant_err.gif" alt="O(5) equivariant error demo" loading="lazy" />
-            <figcaption class="figcap"><strong>O(5)</strong> · high-dimensional equivariance visualization</figcaption>
-          </figure>
-          <figure class="card">
-            <img class="figure" src="notebooks/figs/so3_demo_readme.gif" alt="SO(3) demo" loading="lazy" />
-            <figcaption class="figcap"><strong>SO(3)</strong> · extensibility example for new groups</figcaption>
-          </figure>
+        <div class="gif-wrap" id="vit-wrap">
+          <img id="v0" src="notebooks/figs/vit_softness_0.0.gif" alt="ViT s=0.0" class="active"/>
+          <img id="v1" src="notebooks/figs/vit_softness_0.2.gif" alt="ViT s=0.2"/>
+          <img id="v2" src="notebooks/figs/vit_softness_0.6.gif" alt="ViT s=0.6"/>
+          <img id="v3" src="notebooks/figs/vit_softness_1.0.gif" alt="ViT s=1.0"/>
+        </div>
+        <div class="demo-card-body">
+          <p class="demo-cap">Final-layer feature maps under a continuous 360° rotation test.
+          Patch projection and positional embeddings are projected via the Schur filter.</p>
+          <div class="mini-slider-wrap">
+            <div class="mini-top">
+              <span class="mini-lbl">Softness <em>b</em></span>
+              <span class="mini-val" id="vval">b = 0.0</span>
+            </div>
+            <div class="mini-track">
+              <div class="mini-track-bg"></div>
+              <div class="mini-track-fg" id="vtfg" style="width:0%"></div>
+              <input class="mini-input" id="vs" type="range" min="0" max="3" step="1" value="0"/>
+            </div>
+            <div class="mini-marks">
+              <span class="mini-mark on" id="vm0">0.0</span>
+              <span class="mini-mark" id="vm1">0.2</span>
+              <span class="mini-mark" id="vm2">0.6</span>
+              <span class="mini-mark" id="vm3">1.0</span>
+            </div>
+            <div class="mini-desc" id="vdesc"><strong>b = 0.0 —</strong> Strict equivariance. Feature rows are nearly identical for every rotation angle; error map is near zero.</div>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section class="section" id="code">
-      <div class="container">
-        <h2>Code at a glance</h2>
-        <p>
-          The main implementation applies filters to pretrained layers at forward time.
-          See the GitHub repository for training scripts, model wrappers, and group-specific constraint implementations.
-        </p>
-
-        <div class="code" aria-label="Code snippet">
-<pre><code># Pseudocode sketch
-model = load_pretrained_backbone(...)
-
-# Wrap layers: Conv2d / Linear / Patch projection
-model = wrap_with_filtered_layers(model, group="C4", softness=0.6)
-
-# Run normally
-y = model(x)</code></pre>
+      <!-- ResNet -->
+      <div class="demo-card">
+        <div class="demo-card-head">
+          <span class="demo-card-title">ResNet</span>
+        </div>
+        <div class="gif-wrap" id="rn-wrap">
+          <img id="r0" src="notebooks/figs/resnet_softness_0.0.gif" alt="ResNet s=0.0" class="active"/>
+          <img id="r1" src="notebooks/figs/resnet_softness_0.2.gif" alt="ResNet s=0.2"/>
+          <img id="r2" src="notebooks/figs/resnet_softness_0.6.gif" alt="ResNet s=0.6"/>
+          <img id="r3" src="notebooks/figs/resnet_softness_1.0.gif" alt="ResNet s=1.0"/>
+        </div>
+        <div class="demo-card-body">
+          <p class="demo-cap">Final-layer feature maps under the same 360° rotation test.
+          All convolutional layers are projected; 1×1 skip connections are left unchanged.</p>
+          <div class="mini-slider-wrap">
+            <div class="mini-top">
+              <span class="mini-lbl">Softness <em>b</em></span>
+              <span class="mini-val" id="rval">b = 0.0</span>
+            </div>
+            <div class="mini-track">
+              <div class="mini-track-bg"></div>
+              <div class="mini-track-fg" id="rtfg" style="width:0%"></div>
+              <input class="mini-input" id="rs" type="range" min="0" max="3" step="1" value="0"/>
+            </div>
+            <div class="mini-marks">
+              <span class="mini-mark on" id="rm0">0.0</span>
+              <span class="mini-mark" id="rm1">0.2</span>
+              <span class="mini-mark" id="rm2">0.6</span>
+              <span class="mini-mark" id="rm3">1.0</span>
+            </div>
+            <div class="mini-desc" id="rdesc"><strong>b = 0.0 —</strong> Strict equivariance. Feature rows are nearly identical for every rotation angle; error map is near zero.</div>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section class="section" id="cite">
-      <div class="container">
-        <h2>Citation</h2>
-        <p>If you use this work, please cite:</p>
-        <div class="code" aria-label="BibTeX">
-<pre><code>@InProceedings{rahman2026tunable,
-  author    = {Rahman, Md Ashiqur and Hao, Lim Jun and Jiang, Jeremiah and Lim, Teck-Yian and Yeh, Raymond A},
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BEYOND 2D ═══ -->
+<section id="groups">
+  <div class="wrap">
+    <div class="sec-label">Beyond 2D</div>
+    <h2>Scientific groups: SO(3) and O(5)</h2>
+    <p style="margin-bottom:24px;">
+      The weight projection framework extends naturally to equivariant MLPs for scientific computing.
+      Swapping in the group-specific Lie algebra generators (or forward differences for discrete groups)
+      is all that changes — the interpolation and error guarantee are identical.
+      Both animations sweep rotation angles; the error distributions confirm that
+      <strong>equivariance is exact at b&nbsp;=&nbsp;0 and degrades monotonically as b increases</strong>.
+    </p>
+
+    <div class="group-tabs">
+      <button class="gtab active" data-group="so3">SO(3) — 3D Rotations</button>
+      <button class="gtab" data-group="o5">O(5) — High-Dim Orthogonal</button>
+    </div>
+
+    <!-- SO(3) panel -->
+    <div class="group-panel active" id="panel-so3">
+      <div class="carousel" id="car-so3">
+        <div class="carousel-track">
+
+          <div class="carousel-slide active" id="so3-slide-0">
+            <div class="sci-card">
+              <div class="sci-head">
+                <span class="sci-group">SO(3)</span>
+                <span class="sci-type">Equivariance</span>
+              </div>
+              <img src="notebooks/figs/equivariance_demo_pro.gif"
+                   alt="SO(3) equivariance: 3D vectors f_s(x) vs R⁻¹f_s(Rx), error distribution across softness"/>
+              <div class="sci-desc">
+                <strong>Left:</strong> the equivariance condition <code>f<sub>b</sub>(x) ≈ R<sup>−1</sup>f<sub>b</sub>(Rx)</code>
+                as 3D vectors — coinciding at b&nbsp;=&nbsp;0, diverging at b&nbsp;=&nbsp;1.
+                <strong>Right:</strong> distribution of ‖R<sup>−1</sup>f<sub>b</sub>(Rx) − f<sub>b</sub>(x)‖₂
+                over many inputs. The mass is exactly at zero when b&nbsp;=&nbsp;0.
+              </div>
+            </div>
+            <div class="sci-card">
+              <div class="sci-head">
+                <span class="sci-group">SO(3)</span>
+                <span class="sci-type">Invariance</span>
+              </div>
+              <img src="notebooks/figs/invariance_demo.gif"
+                   alt="SO(3) invariance error distribution across softness values"/>
+              <div class="sci-desc">
+                For invariant outputs, <code>|f(Rx) − f(x)|</code> should be zero for all rotations.
+                At b&nbsp;=&nbsp;0 invariance is exact. As b increases the distribution broadens
+                gracefully — monotonic and predictable, consistent with the theoretical bound.
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-slide" id="so3-slide-1">
+            <div class="sci-card">
+              <div class="sci-head">
+                <span class="sci-group">SO(3)</span>
+                <span class="sci-type">Equivariance — vector view</span>
+              </div>
+              <img src="notebooks/figs/output.gif"
+                   alt="SO(3) equivariance, vector divergence view"/>
+              <div class="sci-desc">
+                Complementary visualization of the same equivariance condition:
+                expected output <code>f<sub>b</sub>(x)</code> (dashed) vs.
+                actual <code>R<sup>−1</sup>f<sub>b</sub>(Rx)</code>.
+                The two traces collapse at b&nbsp;=&nbsp;0 and separate as b grows.
+              </div>
+            </div>
+            <div class="sci-card">
+              <div class="sci-head">
+                <span class="sci-group">SO(3)</span>
+                <span class="sci-type">End-to-end demo</span>
+              </div>
+              <img src="notebooks/figs/so3_demo_readme.gif"
+                   alt="SO(3) end-to-end demo"/>
+              <div class="sci-desc">
+                Full end-to-end SO(3) pipeline: Lie algebra generators → SVD-based projector →
+                <code>FilteredLinear</code> wrapping → soft interpolation. See
+                <code>notebooks/mlp_so3.ipynb</code>.
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="carousel-nav">
+          <button class="carousel-btn" id="so3-prev" disabled>&#8592;</button>
+          <div class="carousel-dots">
+            <span class="cdot on" id="so3-dot-0"></span>
+            <span class="cdot" id="so3-dot-1"></span>
+          </div>
+          <button class="carousel-btn" id="so3-next">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- O(5) panel -->
+    <div class="group-panel" id="panel-o5">
+      <div class="carousel-slide active" style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+        <div class="sci-card">
+          <div class="sci-head">
+            <span class="sci-group">O(5)</span>
+            <span class="sci-type">Equivariance</span>
+          </div>
+          <img src="notebooks/figs/o5_equivariant_err.gif"
+               alt="O(5) equivariance error distribution across softness values"/>
+          <div class="sci-desc">
+            The O(5) equivariant projector is constructed from the 5×5 orthogonal group's
+            Lie algebra generators. Error distribution is concentrated at zero when b&nbsp;=&nbsp;0
+            and spreads as b increases — confirming the guarantee holds in higher dimensions.
+          </div>
+        </div>
+        <div class="sci-card">
+          <div class="sci-head">
+            <span class="sci-group">O(5)</span>
+            <span class="sci-type">Invariance</span>
+          </div>
+          <img src="notebooks/figs/o5_invariant.gif"
+               alt="O(5) invariance error distribution across softness values"/>
+          <div class="sci-desc">
+            Invariance error for O(5) scalar outputs. The monotonic broadening of the error
+            distribution as b increases mirrors the SO(3) case, validating
+            the generality of the projection framework across groups and dimensions.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ CODE ═══ -->
+<section id="code">
+  <div class="wrap">
+    <div class="sec-label">Quick Start</div>
+    <h2>Wrap any pretrained model in three lines</h2>
+    <p>Specify the symmetry group and the control value <strong>b</strong>. No architecture changes, no new parameters, no modifications to the training objective.</p>
+
+    <div class="codeblock">
+      <div class="codeblock-head">
+        <span>Python</span>
+        <span>github.com/ashiq24/soft-equivariance</span>
+      </div>
+      <pre><code>from standalone.vit_soft_equivariance_standalone import monkeypatch_vitembeddings
+    from standalone.resnet_soft_equivariance_standalone import convert_cnn_to_filtered
+
+    filter_config = {"n_rotations": 4, "soft_thresholding": 0.2,
+             "soft_thresholding_pos": 0.2, "group_type": "rotation"}
+    monkeypatch_vitembeddings(model.vit.embeddings, filter_config)
+    # For CNNs: convert_cnn_to_filtered(model, filter_config)</code></pre>
+    </div>
+
+    <p style="margin-top:16px;">
+      Standalone single-file demos are in <code>standalone/</code>.
+      Group-specific notebooks with full derivations are in <code>notebooks/</code>.
+      In code the control parameter is named <code>softness</code> and corresponds to <strong>b</strong> here.
+      See <a href="https://github.com/ashiq24/soft-equivariance" style="color:var(--accent);">the repo</a> for training scripts and filter factory docs.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ CITATION ═══ -->
+<section id="cite">
+  <div class="wrap">
+    <div class="sec-label">Citation</div>
+    <h2>BibTeX</h2>
+    <p>If this work is useful to your research, please cite:</p>
+    <div class="cite-block">
+      <pre>@InProceedings{rahman2026tunable,
+  author    = {Rahman, Md Ashiqur and Hao, Lim Jun and Jiang, Jeremiah
+               and Lim, Teck-Yian and Yeh, Raymond A},
   title     = {Tunable Soft Equivariance with Guarantee},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer
+               Vision and Pattern Recognition (CVPR)},
   year      = {2026}
-}</code></pre>
-        </div>
+}</pre>
+    </div>
+  </div>
+</section>
 
-        <div class="footer">
-          <div class="container" style="padding:0;">
-            <div class="small">
-              Links: <a href="https://arxiv.org/abs/2603.26657" target="_blank" rel="noreferrer">arXiv</a>
-              · <a href="https://arxiv.org/pdf/2603.26657" target="_blank" rel="noreferrer">PDF</a>
-              · <a href="https://github.com/ashiq24/soft-equivariance" target="_blank" rel="noreferrer">GitHub</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-row">
+    <span>Tunable Soft Equivariance with Guarantee &nbsp;·&nbsp; CVPR 2026</span>
+    <div class="footer-links">
+      <a href="https://arxiv.org/pdf/2603.26657" target="_blank" rel="noreferrer">PDF</a>
+      <a href="https://huggingface.co/collections/ashiq24/soft-equivariant-vision-foundation-models" target="_blank" rel="noreferrer">HuggingFace</a>
+      <a href="https://github.com/ashiq24/soft-equivariance" target="_blank" rel="noreferrer">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var bvals = ['0.0','0.2','0.6','1.0'];
+  var vitDescs = [
+    '<strong>b = 0.0 —</strong> Strict equivariance. Feature rows are nearly identical for every rotation angle; error map is near zero.',
+    '<strong>b = 0.2 —</strong> Mostly equivariant. A small fraction of pretrained weights is restored. Feature rows remain highly consistent with only minor, bounded deviations.',
+    '<strong>b = 0.6 —</strong> Balanced trade-off. Representational capacity is partially recovered; rows begin to differ noticeably as the rotation angle increases.',
+    '<strong>b = 1.0 —</strong> Original pretrained weights. No symmetry constraint. Feature rows diverge freely under rotation.'
+  ];
+  var rnDescs = [
+    '<strong>b = 0.0 —</strong> Strict equivariance. All convolutional layers projected; feature rows match throughout the full rotation sweep.',
+    '<strong>b = 0.2 —</strong> Near-equivariant. The bulk of the projection is retained; small deviations appear at larger rotation angles.',
+    '<strong>b = 0.6 —</strong> Partial equivariance. The model recovers more of its pretrained capacity; the error map brightens at larger rotations.',
+    '<strong>b = 1.0 —</strong> Original ResNet weights. The feature rows diverge — output is sensitive to absolute orientation, as in the unmodified model.'
+  ];
+
+  function makeSlider(cfg) {
+    var inp  = document.getElementById(cfg.inputId);
+    var tfg  = document.getElementById(cfg.fgId);
+    var val  = document.getElementById(cfg.valId);
+    var desc = document.getElementById(cfg.descId);
+    var imgs = cfg.imgIds;
+    var marks = cfg.markIds;
+    var descs = cfg.descs;
+
+    function activate(idx) {
+      tfg.style.width = (idx / 3 * 100) + '%';
+      val.textContent = 'b = ' + bvals[idx];
+      desc.innerHTML  = descs[idx];
+      for (var i = 0; i < 4; i++) {
+        document.getElementById(imgs[i]).classList.toggle('active', i === idx);
+        document.getElementById(marks[i]).classList.toggle('on', i === idx);
+      }
+    }
+    inp.addEventListener('input', function () { activate(parseInt(this.value, 10)); });
+    activate(0);
+  }
+
+  makeSlider({ inputId:'vs', fgId:'vtfg', valId:'vval', descId:'vdesc', imgIds:['v0','v1','v2','v3'], markIds:['vm0','vm1','vm2','vm3'], descs:vitDescs });
+  makeSlider({ inputId:'rs', fgId:'rtfg', valId:'rval', descId:'rdesc', imgIds:['r0','r1','r2','r3'], markIds:['rm0','rm1','rm2','rm3'], descs:rnDescs });
+
+  // Group tabs
+  document.querySelectorAll('.gtab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var g = this.dataset.group;
+      document.querySelectorAll('.gtab').forEach(function (b) { b.classList.toggle('active', b.dataset.group === g); });
+      document.querySelectorAll('.group-panel').forEach(function (p) { p.classList.toggle('active', p.id === 'panel-' + g); });
+    });
+  });
+
+  // SO(3) carousel
+  var so3Idx = 0;
+  var so3Total = 2;
+  function so3Go(idx) {
+    so3Idx = idx;
+    for (var i = 0; i < so3Total; i++) {
+      document.getElementById('so3-slide-' + i).classList.toggle('active', i === idx);
+      document.getElementById('so3-dot-' + i).classList.toggle('on', i === idx);
+    }
+    document.getElementById('so3-prev').disabled = idx === 0;
+    document.getElementById('so3-next').disabled = idx === so3Total - 1;
+  }
+  document.getElementById('so3-prev').addEventListener('click', function () { if (so3Idx > 0) so3Go(so3Idx - 1); });
+  document.getElementById('so3-next').addEventListener('click', function () { if (so3Idx < so3Total - 1) so3Go(so3Idx + 1); });
+  so3Go(0);
+})();
+</script>
+
 </body>
 </html>
