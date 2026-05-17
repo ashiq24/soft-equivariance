@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Tunable Soft Equivariance with Guarantee — CVPR 2026</title>
-  <meta name="description" content="A framework for projecting pretrained model weights into the equivariant subspace, with a provable bound on the induced symmetry error."/>
+  <meta name="description" content="A framework for projecting pretrained model into the equivariant subspace, with a provable bound on the induced symmetry error."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -151,6 +151,15 @@
     .mini-desc { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.55; min-height: 38px; }
     .mini-desc strong { color: var(--accent); }
 
+    /* ── Demo Tabs ── */
+    .demo-tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+    .dtab { padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surf); color: var(--muted); transition: all 140ms; }
+    .dtab.active { background: rgba(217,119,87,.12); border-color: rgba(217,119,87,.30); color: var(--accent); }
+    .dtab:hover:not(.active) { background: var(--surf2); color: var(--text); }
+    .demo-panel { display: none; }
+    .demo-panel.active { display: flex; flex-direction: column; gap: 0; }
+    @media (max-width: 760px) { .demo-panel.active { flex-direction: column; } }
+
     /* ── Scientific groups tabs ── */
     .group-tabs { display: flex; gap: 8px; margin-bottom: 22px; }
     .gtab { padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surf); color: var(--muted); transition: all 140ms; }
@@ -197,6 +206,92 @@
     .footer-links a { color: var(--muted); transition: color 140ms; }
     .footer-links a:hover { color: var(--text); }
 
+    /* Schur educational carousel */
+    .schur-edu-wrap { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .schur-edu-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--surf); }
+    .schur-edu-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+    .schur-carousel .carousel-slide.active { display: block; padding: 16px 16px 10px; }
+    .schur-slide-h { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .schur-bullets { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; margin: 0; }
+    .schur-bullets li { font-size: 12px; color: var(--muted); line-height: 1.6; display: flex; gap: 8px; align-items: flex-start; }
+    .schur-bullets li::before { content: '›'; color: var(--accent); font-weight: 800; font-size: 13px; flex-shrink: 0; line-height: 1.6; }
+    .schur-bullets li code { white-space: nowrap; }
+    .schur-code { background: var(--code-bg); border-radius: var(--rsm); padding: 11px 14px; margin: 10px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.75; color: rgba(255,255,255,.82); overflow-x: auto; white-space: pre; }
+    .schur-cases { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .schur-case { padding: 10px 12px; border-radius: var(--rsm); border: 1px solid var(--border); background: var(--surf); }
+    .schur-case-title { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }
+    .badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 999px; letter-spacing: .04em; }
+    .badge-ok   { background: rgba(217,119,87,.12); color: var(--accent); border: 1px solid rgba(217,119,87,.28); }
+    .badge-zero { background: rgba(0,0,0,.06); color: var(--muted2); border: 1px solid var(--border); }
+    .schur-case p { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+    .mcall-bullets { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-direction: column; gap: 5px; }
+    .mcall-bullets li { font-size: 12px; color: var(--muted); line-height: 1.55; display: flex; gap: 8px; align-items: flex-start; }
+    .mcall-bullets li::before { content: '—'; color: var(--accent2); font-weight: 700; flex-shrink: 0; font-size: 11px; line-height: 1.7; }
+    .mcall-bullets li code { display: inline; white-space: nowrap; }
+
+    /* ── Error Bound Card ── */
+    .bound-card { margin-top: 16px; border: 1px solid rgba(217,119,87,.30); border-radius: var(--r); overflow: hidden; }
+    .bound-card-head { padding: 8px 16px; background: rgba(217,119,87,.08); border-bottom: 1px solid rgba(217,119,87,.18); font-size: 10px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--accent); }
+    .bound-card-body { padding: 14px 16px 12px; }
+    .bound-formula { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; color: var(--text); margin: 2px 0 14px; letter-spacing: -.01em; }
+    .bound-formula em { color: var(--accent); font-style: normal; }
+    .bound-vars { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid var(--border); padding-top: 10px; }
+    .bound-var { display: flex; align-items: baseline; gap: 10px; font-size: 12px; line-height: 1.5; }
+    .bound-var-sym { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent2); min-width: 28px; flex-shrink: 0; }
+    .bound-var-def { color: var(--muted); }
+    .mfrac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; font-size: .92em; }
+    .mfrac-num { border-bottom: 1.5px solid var(--text); padding: 0 4px 2px; white-space: nowrap; }
+    .mfrac-den { padding: 3px 4px 0; white-space: nowrap; }
+
+    /* ── Schur Block Diagram ── */
+    .schur-wrap { margin-top: 16px; padding: 14px 14px 12px; border: 1px solid var(--border); border-radius: var(--r); background: var(--surf); }
+    .schur-wrap-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .schur-wrap-sub { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+
+
+    /* ── Schur Section Tabs ── */
+    .schur-tabs { display: flex; gap: 4px; margin: 0 0 18px; flex-wrap: wrap; }
+    .stab { padding: 7px 15px; border-radius: 999px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surf); color: var(--muted); transition: all 140ms; }
+    .stab.active { background: rgba(217,119,87,.12); border-color: rgba(217,119,87,.30); color: var(--accent); }
+    .stab:hover:not(.active) { background: var(--surf2); color: var(--text); }
+    .stab-content { min-height: 340px; }
+    .stab-panel { display: none; }
+    .stab-panel.active { display: block; }
+
+    /* Matrix grids */
+    .mtx { display: inline-grid; padding: 5px 3px; border-left: 2.5px solid var(--text); border-right: 2.5px solid var(--text); border-radius: 3px; vertical-align: middle; gap: 0; }
+    .mtx span { min-width: 32px; height: 26px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); padding: 0 3px; }
+    .mtx .z { color: var(--muted2); }
+    .mtx .p { color: var(--accent); font-weight: 600; }
+    .mtx .neg { color: var(--accent2); }
+    .mtx .hi { background: rgba(217,119,87,.12); border-radius: 2px; }
+    .mtx-sm span { min-width: 24px; height: 22px; font-size: 10px; }
+    .mat-eq { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+    .mat-label { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+    .mat-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 6px 0; }
+    .basis-grid { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .basis-item { text-align: center; }
+    .basis-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted2); margin-bottom: 2px; }
+    .basis-item .mtx span { min-width: 20px; height: 18px; font-size: 9px; }
+    .cplx-compare { margin: 10px 0; display: flex; flex-direction: column; gap: 10px; }
+    .cplx-item { padding: 10px 14px; border-radius: var(--rsm); border: 1px solid var(--border); background: var(--surf); }
+    .cplx-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .cplx-method { font-size: 13px; font-weight: 700; color: var(--text); }
+    .cplx-cost { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--accent); }
+    .cplx-bar { height: 8px; border-radius: 4px; margin-bottom: 6px; }
+    .cplx-bar.naive { background: rgba(217,119,87,.20); width: 100%; }
+    .cplx-bar.schur { background: var(--accent); width: 3%; min-width: 6px; }
+    .cplx-detail { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .block-tbl { width: 100%; border-collapse: collapse; font-size: 11.5px; margin: 10px 0; }
+    .block-tbl th { padding: 6px 8px; text-align: left; font-weight: 700; color: var(--text); background: var(--surf2); border-bottom: 1px solid var(--border); }
+    .block-tbl td { padding: 5px 8px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    .block-tbl .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .block-tbl .center { text-align: center; }
+    .param-callout { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: var(--rsm); border: 1px solid rgba(217,119,87,.25); background: rgba(217,119,87,.06); margin-top: 12px; flex-wrap: wrap; }
+    .param-num { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .param-arrow { font-size: 18px; color: var(--muted2); }
+    .param-desc { font-size: 12px; color: var(--muted); line-height: 1.5; flex: 1; min-width: 180px; }
+
     @media (max-width: 600px) {
       .hero { padding: 48px 0 36px; }
       section { padding: 48px 0; }
@@ -216,6 +311,7 @@
     <nav class="nav-links">
       <a href="#problem">Overview</a>
       <a href="#method">Method</a>
+      <a href="#schur">Schur</a>
       <a href="#demo">Demo</a>
       <a href="#groups">Beyond 2D</a>
       <a href="#code">Code</a>
@@ -236,13 +332,12 @@
     <h1>Tunable <em>Soft</em> Equivariance with Guarantee</h1>
 
     <p class="hero-sub">
-      A framework for injecting tunable symmetry into any pretrained model — without adding
-      learned parameters — by projecting weights through soft equivariant filters
+      A framework for injecting tunable approximate symmetry into any pretrained model. No additional parameters. Projects the weights through soft equivariant filters
       controlled by a single scalar <strong>b</strong>.
     </p>
 
     <div class="authors">
-      <strong>Md Ashiqur Rahman &nbsp;·&nbsp; Lim Jun Hao &nbsp;·&nbsp; Jeremiah Jiang &nbsp;·&nbsp; Teck-Yian Lim &nbsp;·&nbsp; Raymond A. Yeh</strong>
+      <strong> Md Ashiqur Rahman &nbsp;·&nbsp; Lim Jun Hao &nbsp;·&nbsp; Jeremiah Jiang &nbsp;·&nbsp; Teck-Yian Lim &nbsp;·&nbsp; Raymond A. Yeh</strong>
     </div>
 
     <div class="cta-row">
@@ -264,8 +359,8 @@
       <img src="notebooks/figs/soft_eq_fig.png"
            alt="Five softness levels visualized: convolution kernels, feature maps of two rotated inputs, and equivariance error heatmaps"/>
       <figcaption>
-        <strong>Each column is one softness value</strong> <em>b</em>, from strict equivariance (b&nbsp;=&nbsp;0, left) to the original pretrained model (b&nbsp;=&nbsp;1, right).
-        Rows show convolution kernels, final feature maps for two rotated versions of the same image, and the pointwise equivariance error (blue&nbsp;=&nbsp;low, red&nbsp;=&nbsp;high).
+        <strong>Each column represents one softness value</strong> <em>b</em>, from strict equivariance (b&nbsp;=&nbsp;0, left) to the original pretrained model (b&nbsp;=&nbsp;1, right).
+        Top row shows patch embedding weights, <strong>2nd and 3rd rows</strong> show final feature maps for two rotated versions of the same image, and bottom row shows the pointwise equivariance error (blue&nbsp;=&nbsp;low, red&nbsp;=&nbsp;high).
         At b&nbsp;=&nbsp;0 the feature maps are nearly identical and the error is negligible; both degrade continuously and predictably as b increases.
       </figcaption>
     </figure>
@@ -281,10 +376,10 @@
         <div class="sec-label">The Problem</div>
         <h2>Two extremes, both costly</h2>
         <p>
-          Pretrained vision and scientific models are powerful but symmetry-unaware —
+          Pretrained vision models are powerful but symmetry-unaware -
           rotate the input and the output changes unpredictably.
-          <strong>Strict equivariance</strong> fixes this but often forces training from scratch,
-          discarding pretrained representations and over-constraining the model
+          <strong>Strict equivariance</strong> fixes this but often imposes compute burden,
+          does not scale and over-constraining the model
           in settings where only approximate symmetry holds.
         </p>
         <p>
@@ -309,7 +404,7 @@
         <div class="kpis">
           <div class="kpi"><div class="kpi-label">New parameters</div><div class="kpi-val">None</div></div>
           <div class="kpi"><div class="kpi-label">Control range</div><div class="kpi-val">b ∈ [0, 1]</div></div>
-          <div class="kpi"><div class="kpi-label">Groups supported</div><div class="kpi-val">C<sub>n</sub>, SO(3), O(5), …</div></div>
+          <div class="kpi"><div class="kpi-label">Groups supported</div><div class="kpi-val"> All</div></div>
         </div>
       </div>
 
@@ -321,78 +416,98 @@
 <section id="method">
   <div class="wrap">
     <div class="sec-label">Method</div>
-    <h2>Project into subspaces with controllable equivariance error</h2>
+    <h2>Weight projection with controllable equivariance error</h2>
 
     <div class="cols2" style="margin-top:6px;">
 
       <div>
         <p>
-          For a linear map <code>W</code> with input/output group representations
-          <code>ρ<sub>X</sub></code> and <code>ρ<sub>Y</sub></code>, the equivariance condition
-          <code>ρ<sub>Y</sub>(g)W = Wρ<sub>X</sub>(g)</code> defines a <strong>linear subspace</strong>
-          of weight space. The projector <code>P(W)</code> is the orthogonal projection onto
-          this subspace.
+          A function F is <strong>equivariant</strong> to group G if it satisfies: <code>F(ρ<sub>X</sub>(g)x) = ρ<sub>Y</sub>(g)F(x)</code>. This constraints is satisfied by a small subspace of all possible functions, i.e., 0 equivariance error.
+          We build a projection operator that can project the weights of F into different subspace with different degree of equivariance error controlled by parameter <strong>b</strong>.
         </p>
 
-        <div class="eq">
-            <div class="eq-head">equivariant filter — exact formula</div>
-            <pre><span class="c"># Equivariance constraint:</span>
-      <span class="kw">ρ_Y</span>(g) W  =  W <span class="kw">ρ_X</span>(g)
-
-      <span class="c"># 1. Build Kronecker constraint matrix L:</span>
-      L  =  <span class="kw">dρ_X</span><sup>ᵀ</sup> ⊗ I<sub>d′</sub>  −  I<sub>d</sub> ⊗ <span class="kw">dρ_Y</span>
-      L · vec(W)  =  0   <span class="c"># equivariant subspace</span>
-
-      <span class="c"># 2. Project with cut-off b:</span>
-      keep basis vectors with σ<sub>i</sub> &lt; <span class="val">b</span>  <span class="c">(smaller b ⇒ stricter equivariance)</span></pre>
-        </div>
-
-        <p style="margin-top:14px;">
-          The equivariance error is <strong>provably bounded</strong> and controlled by <em>b</em>,
-          providing a formal guarantee at any operating point.
-        </p>
-
-        <div class="method-callouts" style="margin-top:18px;">
+        <!-- Step 1+2: the two filter types -->
+        <div class="method-callouts" style="margin-top:16px;">
           <div class="mcall">
             <div class="mcall-icon">∂</div>
             <div class="mcall-body">
-              <div class="mcall-title">Invariant filter — SVD cut-off</div>
+              <div class="mcall-title">Invariant filter — scalar outputs</div>
               <div class="mcall-desc">
-                For scalar outputs <code>y = wᵀx</code>, decompose the Lie-algebra action
-                <code>dρ(A) = UΣVᵀ</code> and keep basis vectors with <code>σ<sub>i</sub> &lt; b</code>.
-                The filter <code>B<sub>inv</sub></code> projects into low-sensitivity directions.
+                For <code>y = wᵀx</code>, the Lie-algebra representation <code>dρ(A)</code> tells how infinitesimal
+                action changes the vector. Decompose <code>dρ(A) = UΣVᵀ</code> and
+                keep only directions <code>u<sub>i</sub></code> with <strong>small singular values</strong>
+                <code>σ<sub>i</sub> &lt; b</code> — these are the least action-sensitive directions.
+                The invariant filter <code>B<sub>inv</sub> = Σ<sub>σ<sub>i</sub>&lt;b</sub> u<sub>i</sub>u<sub>i</sub>ᵀ</code>
+                projects <code>w</code> into that subspace.
               </div>
             </div>
           </div>
           <div class="mcall">
             <div class="mcall-icon">⊕</div>
             <div class="mcall-body">
-              <div class="mcall-title">Equivariant filter — vector case</div>
+              <div class="mcall-title">Equivariant filter — vector outputs</div>
               <div class="mcall-desc">
-                For <code>y = Wx</code>, form the operator
-                <code>L = (dρ<sub>X</sub><sup>ᵀ</sup> ⊗ I − I ⊗ dρ<sub>Y</sub>)</code> and project
-                <code>vec(W) = B<sub>eq</sub>θ</code> using the <code>σ<sub>i</sub> &lt; b</code> subspace.
-                This guarantees bounded equivariance deviation.
-              </div>
-            </div>
-          </div>
-          <div class="mcall">
-            <div class="mcall-icon">Δ</div>
-            <div class="mcall-body">
-              <div class="mcall-title">Fast Schur filter — scalable</div>
-              <div class="mcall-desc">
-                A Schur decomposition block-diagonalizes <code>dρ</code>, enabling blockwise
-                constraints (e.g., 2×2 rotation blocks) and a fast projection.
-                Complexity improves to <strong>O(max(d,&nbsp;d')³)</strong> vs.
-                <strong>O((d·d')³)</strong> for naive SVD.
+                For <code>y = Wx</code>, vectorising gives the Kronecker constraint
+                <code>L·vec(W) = 0</code> where
+                <code>L = dρ<sub>X</sub>ᵀ ⊗ I − I ⊗ dρ<sub>Y</sub></code>.
+                The null space of L is the exact equivariant subspace. Equivariant filter <code>B<sub>eq</sub></code> created following the same procedure as the invariant filter from <code>L</code>.
+                
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Step 3: exact code — two stages -->
+        <div class="eq" style="margin-top:16px;">
+          <div class="eq-head">Stage 1 — Filter Construction &nbsp;(once, offline)</div>
+          <pre><span class="c"># Build Kronecker constraint matrix:</span>
+<span class="kw">L</span>  =  d<span class="val">ρ</span>_X<sup>ᵀ</sup> ⊗ I<sub>d′</sub>  −  I<sub>d</sub> ⊗ d<span class="val">ρ</span>_Y       <span class="c">∈ ℝ^{dd′ × dd′}</span>
+<span class="c"># SVD of L — sort singular values ascending:</span>
+U, <span class="val">Σ</span>, Vᵀ  =  svd(L)      <span class="c">σ₁ ≤ σ₂ ≤ … ≤ σ_{dd′}</span>
+<span class="c"># Build projection matrix B_eq (keep σᵢ &lt; b):</span>
+<span class="kw">B_eq</span>  =  Σ<sub>σᵢ &lt; b</sub>  u<sub>i</sub> u<sub>i</sub>ᵀ            <span class="c">∈ ℝ^{dd′ × dd′}</span></pre>
+        </div>
+
+        <div class="eq" style="margin-top:6px;">
+          <div class="eq-head">Stage 2 — Forward Pass &nbsp;(every inference / training step)</div>
+          <pre><span class="c"># Flatten pretrained weights to a vector:</span>
+w_flat  =  vec(<span class="kw">W</span>)                  <span class="c">W ∈ ℝ^{d′×d} → ℝ^{dd′}</span>
+<span class="c"># Project into the equivariant subspace:</span>
+w_proj  =  <span class="kw">B_eq</span> · w_flat           <span class="c">low-sensitivity directions only</span>
+<span class="c"># Reshape back and run the layer:</span>
+<span class="kw">W_b</span>     =  reshape(w_proj,  d′, d)
+y       =  <span class="kw">W_b</span> · x                  <span class="c">output is η-soft equivariant</span></pre>
+        </div>
+
+        <!-- Theorem -->
+        <div class="bound-card" style="margin-top:14px;">
+          <div class="bound-card-head">Theorem — Equivariance Guarantee</div>
+          <div class="bound-card-body">
+            <div class="bound-formula" style="font-size:13px;line-height:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 0 8px;"><span class="mfrac"><span class="mfrac-num">‖F(ρ<sub>X</sub>(g)x) − ρ<sub>Y</sub>(g)F(x)‖</span><span class="mfrac-den">‖J<sub>F</sub>‖<sub>F</sub> · ‖x‖</span></span>&nbsp;≤&nbsp;<em>b</em> · √(n<sub>G</sub> · r<sub>G</sub>) + ε<sub>G</sub></div>
+            <div class="bound-vars">
+              <div class="bound-var"><span class="bound-var-sym">b</span><span class="bound-var-def">SVD cut-off — the softness dial. <strong>b↓ → stricter equivariance</strong></span></div>
+              <div class="bound-var"><span class="bound-var-sym">n<sub>G</sub></span><span class="bound-var-def">Dimension of the Lie algebra</span></div>
+              <div class="bound-var"><span class="bound-var-sym">r<sub>G</sub></span><span class="bound-var-def">Injective radius of the group G</span></div>
+              <div class="bound-var"><span class="bound-var-sym">ε<sub>G</sub></span><span class="bound-var-def">Normalized Taylor approximation error</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schur filter teaser — full section below -->
+        <div style="margin-top:14px;padding:12px 16px;border-radius:var(--rsm);border:1px solid rgba(217,119,87,.25);background:rgba(217,119,87,.06);">
+          <p style="font-size:13px;margin:0;line-height:1.6;">
+            <strong style="color:var(--accent);">Fast Schur filter</strong> —
+            reduces construction cost from O((dd′)³) to O(max(d,d′)³) by exploiting
+            block-diagonal structure via Schur decomposition. Critical for high-order tensor
+            representations (e.g. O(5) T(4), d = 625).
+            <a href="#schur" style="color:var(--accent);text-decoration:underline;font-weight:600;">See worked examples below ↓</a>
+          </p>
+        </div>
+
       </div>
 
       <div>
-        <p>The same recipe applies across architectures and groups:</p>
+                <p>The same recipe applies across architectures and groups:</p>
         <div class="steps">
           <div class="step">
             <div class="step-num">1</div>
@@ -422,6 +537,301 @@
   </div>
 </section>
 
+<!-- ═══ SCHUR ═══ -->
+<section id="schur">
+  <div class="wrap">
+    <div class="sec-label">Novel Contribution</div>
+    <h2>Fast Schur Filter — Scalable Construction</h2>
+    <p style="margin-bottom:18px;">
+      The naive SVD approach for constructing equivariant projectors is intractable for large representations.
+      Our <strong>Schur filter</strong> exploits real Schur decomposition to decouple the constraint matrix into
+      small independent blocks — reducing cost by orders of magnitude while producing the identical projection.
+      Below we explain the method with fully worked examples.
+    </p>
+
+    <div class="schur-tabs">
+      <button class="stab active" data-st="overview">Why Schur?</button>
+      <button class="stab" data-st="block-rule">Schur's Lemma</button>
+      <button class="stab" data-st="ex-3x3">3×3 Example</button>
+      <button class="stab" data-st="ex-4x4">4D → 4D</button>
+    </div>
+
+    <div class="stab-content">
+
+      <!-- ──── TAB 1: OVERVIEW ──── -->
+      <div class="stab-panel active" id="st-overview">
+        <div class="cols2">
+          <div>
+            <h3>The scalability problem</h3>
+            <p>The equivariance constraint vectorises to <code>L · vec(Θ) = 0</code>, where
+            <code>L = dρ<sub>X</sub>ᵀ ⊗ I − I ⊗ dρ<sub>Y</sub></code>.
+            For a layer mapping d-dim input to d′-dim output, L is <strong>dd′ × dd′</strong>.
+            SVD of L costs <strong>O((dd′)³)</strong>.</p>
+            <p>For the 4th-order tensor representation T(4) of O(5): d = 5⁴ = 625 — L would have
+            <strong>390,625 rows × 390,625 columns</strong>. Naive SVD is completely infeasible.</p>
+
+            <h3 style="margin-top:16px;">The Schur insight</h3>
+            <div class="steps">
+              <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Schur decompose separately</div><div class="step-desc">Compute the real Schur decomposition of each Lie algebra representation independently:<br><code style="font-size:11px;">dρ<sub>X</sub> = U<sub>X</sub> Σ<sub>X</sub> U<sub>X</sub>ᵀ</code> &nbsp;and&nbsp; <code style="font-size:11px;">dρ<sub>Y</sub> = U<sub>Y</sub> Σ<sub>Y</sub> U<sub>Y</sub>ᵀ</code><br>where Σ is block-diagonal with 1×1 and 2×2 blocks. Cost: O(d³) + O(d′³).</div></div></div>
+              <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Change basis</div><div class="step-desc">Transform weights into the Schur basis: <code style="font-size:11px;">Θ′ = U<sub>Y</sub>ᵀ Θ U<sub>X</sub></code>. The joint constraint becomes <code style="font-size:11px;">Σ<sub>Y</sub>Θ′ = Θ′Σ<sub>X</sub></code>, where Σ<sub>X</sub>, Σ<sub>Y</sub> are block-diagonal.</div></div></div>
+              <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Blocks decouple via Schur's lemma</div><div class="step-desc">Each block Θ′<sub>lk</sub> is independently constrained by a small Sylvester equation — no large SVD needed. Total cost: <strong>O(max(d, d′)³)</strong>.</div></div></div>
+            </div>
+          </div>
+          <div>
+            <h3>Complexity: O(5) T(4)</h3>
+            <p style="margin-bottom:12px;">For the 4th-order tensor representation of O(5), d = 625:</p>
+            <div class="cplx-compare">
+              <div class="cplx-item">
+                <div class="cplx-head"><span class="cplx-method">Naive SVD</span><span class="cplx-cost">≈ 6 × 10¹⁶ ops</span></div>
+                <div class="cplx-bar naive"></div>
+                <div class="cplx-detail">L ∈ ℝ<sup>390,625 × 390,625</sup> — infeasible in memory and compute</div>
+              </div>
+              <div class="cplx-item">
+                <div class="cplx-head"><span class="cplx-method">Schur filter</span><span class="cplx-cost">≈ 2,744 ops</span></div>
+                <div class="cplx-bar schur"></div>
+                <div class="cplx-detail">Max irrep block dim = 14 → 14³ = 2,744 ops — tractable in seconds</div>
+              </div>
+            </div>
+            <p style="margin-top:12px;">Both yield the <strong>identical projection matrix</strong>.</p>
+
+            <h3 style="margin-top:14px;">Schur decomposition — block structure</h3>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:6px;">The decomposition <code>dρ = U Σ Uᵀ</code> reveals a block-diagonal Σ. Each 2×2 block has Schur value λ = √(a² + b²):</p>
+            <svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:340px;height:auto;display:block;">
+              <text x="6" y="68" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="#1c1917">Σ =</text>
+              <rect x="38" y="8" width="260" height="120" rx="0" fill="none" stroke="#1c1917" stroke-width="2"></rect>
+              <line x1="38" y1="68" x2="298" y2="68" stroke="rgba(0,0,0,.12)" stroke-width="1" stroke-dasharray="4,2"></line>
+              <line x1="168" y1="8" x2="168" y2="128" stroke="rgba(0,0,0,.12)" stroke-width="1" stroke-dasharray="4,2"></line>
+              <rect x="40" y="10" width="126" height="56" rx="4" fill="rgba(217,119,87,.10)"></rect>
+              <text x="78" y="34" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">a</text>
+              <text x="128" y="34" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">b</text>
+              <text x="72" y="56" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">−b</text>
+              <text x="128" y="56" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">a</text>
+              <rect x="170" y="70" width="126" height="56" rx="4" fill="rgba(217,119,87,.10)"></rect>
+              <text x="208" y="94" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">c</text>
+              <text x="258" y="94" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">d</text>
+              <text x="203" y="116" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">−d</text>
+              <text x="258" y="116" font-family="JetBrains Mono,monospace" font-size="12" fill="#b05428">c</text>
+              <text x="233" y="45" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="16" fill="#c8b8ad">0</text>
+              <text x="103" y="105" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="16" fill="#c8b8ad">0</text>
+              <text x="103" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d97757">S₁</text>
+              <text x="233" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d97757">S₂</text>
+              <text x="103" y="162" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#a8998f">λ = √(a²+b²)</text>
+              <text x="233" y="162" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#a8998f">λ = √(c²+d²)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──── TAB 2: BLOCK RULE ──── -->
+      <div class="stab-panel" id="st-block-rule">
+        <div class="cols2">
+          <div>
+            <h3>Real Schur Decomposition</h3>
+            <p>For any real square matrix M, there exists an orthogonal U such that U<sup>ᵀ</sup>MU = Σ is block-diagonal with 1×1 and 2×2 blocks. The canonical 2×2 form:</p>
+            <div class="mat-eq" style="justify-content:center;margin:12px 0;">
+              <div class="mtx" style="grid-template-columns:repeat(2,1fr)"><span class="p">a</span><span class="p">b</span><span class="neg">−b</span><span class="p">a</span></div>
+              <span style="font-size:11px;color:var(--muted);margin-left:4px;">Schur values a ± ib, &nbsp;λ = √(a² + b²)</span>
+            </div>
+
+            <h3 style="margin-top:12px;">From equivariance to Sylvester equation</h3>
+            <p>The equivariance condition for a linear layer W requires:</p>
+            <div style="padding:8px 12px;border-radius:var(--rsm);background:var(--surf);border:1px solid var(--border);margin:8px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;">
+              dρ<sub>Y</sub>(A) · W = W · dρ<sub>X</sub>(A)<br>
+              <span style="color:var(--muted2);">↓ Apply Schur: dρ<sub>X</sub> = U<sub>X</sub>Σ<sub>X</sub>U<sub>X</sub>ᵀ, &nbsp;dρ<sub>Y</sub> = U<sub>Y</sub>Σ<sub>Y</sub>U<sub>Y</sub>ᵀ</span><br>
+              U<sub>Y</sub><span style="color:var(--accent);">Σ<sub>Y</sub></span>U<sub>Y</sub>ᵀ · W = W · U<sub>X</sub><span style="color:var(--accent);">Σ<sub>X</sub></span>U<sub>X</sub>ᵀ<br>
+              <span style="color:var(--muted2);">↓ Let Θ′ = U<sub>Y</sub>ᵀ W U<sub>X</sub></span><br>
+              <strong style="color:var(--accent);">Σ<sub>Y</sub> · Θ′ = Θ′ · Σ<sub>X</sub></strong> &nbsp;<span style="color:var(--muted2);">← Sylvester equation</span>
+            </div>
+
+            <h3 style="margin-top:12px;">Schur's Lemma — the block rule</h3>
+            <p>Since Σ<sub>X</sub>, Σ<sub>Y</sub> are block-diagonal, this decouples into independent Sylvester equations per block pair (T<sub>l</sub>, S<sub>k</sub>):</p>
+            <div style="margin-top:8px;">
+              <div class="schur-case">
+                <div class="schur-case-title"><span class="badge badge-zero">T<sub>l</sub> ≇ S<sub>k</sub></span> Different Schur values</div>
+                <p>Θ′<sub>lk</sub> = <strong>0</strong> — forced to zero. No free parameters.</p>
+              </div>
+              <div class="schur-case" style="margin-top:8px;">
+                <div class="schur-case-title"><span class="badge badge-ok">T<sub>l</sub> ≃ S<sub>k</sub></span> Matching Schur values</div>
+                <p>Θ′<sub>lk</sub> takes a constrained rotation form — 2 free parameters (α, β) per matching 2×2 pair, or 1 (γ) per matching 1×1.</p>
+              </div>
+            </div>
+
+            <h3 style="margin-top:12px;">Soft thresholding</h3>
+            <p>Blocks with λ<sub>T<sub>l</sub></sub> + λ<sub>S<sub>k</sub></sub> &gt; b are projected to their equivariant form. Blocks below <strong>b</strong> remain unconstrained — equivalent to the SVD approach but computed block-by-block.</p>
+          </div>
+          <div>
+            <h3>Block structure visualization</h3>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">4×4 weight with two input blocks (S₁, S₂) and two output blocks (T₁, T₂):</p>
+            <svg viewBox="0 0 440 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px;height:auto;display:block;">
+              <text x="4" y="80" font-family="JetBrains Mono,monospace" font-size="11" fill="#6e6157">Θ′ =</text>
+              <text x="145" y="18" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#d97757">S₁</text>
+              <text x="145" y="31" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#a8998f">Schur values a±ib</text>
+              <text x="301" y="18" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#d97757">S₂</text>
+              <text x="301" y="31" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#a8998f">Schur values c±id</text>
+              <text x="42" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#d97757">T₁</text>
+              <text x="42" y="89" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#a8998f">a±ib</text>
+              <text x="42" y="152" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#d97757">T₂</text>
+              <text x="42" y="165" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#a8998f">c±id</text>
+              <rect x="70" y="38" width="150" height="72" rx="6" fill="rgba(217,119,87,.10)" stroke="rgba(217,119,87,.45)" stroke-width="1.5"></rect>
+              <text x="145" y="68" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">α₁   β₁</text>
+              <text x="145" y="84" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">−β₁  α₁</text>
+              <text x="145" y="104" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#d97757">T₁ ≃ S₁ → 2 free params</text>
+              <rect x="226" y="38" width="150" height="72" rx="6" fill="rgba(0,0,0,.025)" stroke="rgba(0,0,0,.10)" stroke-width="1" stroke-dasharray="5,3"></rect>
+              <text x="301" y="80" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="20" fill="#c8b8ad">0</text>
+              <text x="301" y="104" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#a8998f">T₁ ≇ S₂ → forced zero</text>
+              <rect x="70" y="116" width="150" height="72" rx="6" fill="rgba(0,0,0,.025)" stroke="rgba(0,0,0,.10)" stroke-width="1" stroke-dasharray="5,3"></rect>
+              <text x="145" y="158" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="20" fill="#c8b8ad">0</text>
+              <text x="145" y="182" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#a8998f">T₂ ≇ S₁ → forced zero</text>
+              <rect x="226" y="116" width="150" height="72" rx="6" fill="rgba(217,119,87,.10)" stroke="rgba(217,119,87,.45)" stroke-width="1.5"></rect>
+              <text x="301" y="146" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">α₂   β₂</text>
+              <text x="301" y="162" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">−β₂  α₂</text>
+              <text x="301" y="182" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#d97757">T₂ ≃ S₂ → 2 free params</text>
+            </svg>
+            <p style="font-size:11px;color:var(--muted2);margin-top:8px;line-height:1.5;">Dense 4×4 = 16 params. Equivariant = 4 params (α₁, β₁, α₂, β₂). Block sparsity is read directly from Schur value comparisons — no large SVD.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──── TAB 3: 3×3 EXAMPLE ──── -->
+      <div class="stab-panel" id="st-ex-3x3">
+        <p style="margin-bottom:12px;">
+          <strong>Problem:</strong> Consider a neural network layer processing 3D point cloud data.
+          We want this layer to be <strong>equivariant with respect to rotation about the z-axis</strong> —
+          if the input point cloud is rotated around z, the output should rotate accordingly.
+          The weight matrix W ∈ ℝ³ˣ³ maps 3D input vectors to 3D output vectors.
+          The z-rotation Lie algebra generator is A<sub>z</sub>.
+        </p>
+        <div class="cols2">
+          <div>
+            <h3>SVD approach</h3>
+            <div class="mat-eq">
+              <span class="mat-label">A<sub>z</sub> =</span>
+              <div class="mtx" id="mtx-az"></div>
+            </div>
+            <p>Kronecker constraint L = A<sub>z</sub>ᵀ ⊗ I₃ − I₃ ⊗ A<sub>z</sub> ∈ ℝ⁹ˣ⁹:</p>
+            <div class="mat-eq" style="justify-content:center;">
+              <span class="mat-label">L =</span>
+              <div class="mtx mtx-sm" id="mtx-L"></div>
+            </div>
+            <p>Singular values: <code>{0<sup>×3</sup>,  1<sup>×4</sup>,  2<sup>×2</sup>}</code>. Null space → equivariant form:</p>
+            <div class="mat-eq">
+              <span class="mat-label">W<sub>eq</sub> =</span>
+              <div class="mtx" id="mtx-weq"></div>
+              <span style="font-size:11px;color:var(--muted);">(3 free params)</span>
+            </div>
+            <p style="font-size:12px;">With <strong>b = 1.5</strong>, the 7 vectors with σ ∈ {0, 1} are retained. Basis matrices V₁–V₇:</p>
+            <div class="basis-grid" id="basis-grid"></div>
+            <p style="font-size:10.5px;color:var(--muted);margin-top:2px;">V₁–V₃: exactly equivariant (σ=0). V₄–V₇: mildly break equivariance (σ=1), coupling xy-plane to z-axis.</p>
+          </div>
+          <div>
+            <h3>Schur approach (same result, faster)</h3>
+            <p>A<sub>z</sub> is already in real Schur form (U<sub>X</sub>=U<sub>Y</sub>=I₃). Blocks:</p>
+            <div class="mat-row">
+              <span class="mat-label">S₁ =</span>
+              <div class="mtx" id="mtx-s1"></div>
+              <span style="font-size:10px;color:var(--muted);">λ=1</span>
+              <span class="mat-label" style="margin-left:10px;">S₂ =</span>
+              <div class="mtx" id="mtx-s2"></div>
+              <span style="font-size:10px;color:var(--muted);">λ=0</span>
+            </div>
+
+            <table class="block-tbl">
+              <thead><tr><th>Block</th><th>Size</th><th class="center">λ<sub>T</sub>+λ<sub>S</sub></th><th class="center">T≃S?</th><th>Equivariant form</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">Θ′₁₁</td><td class="mono">2×2</td><td class="center" style="color:var(--accent);font-weight:700;">2</td><td class="center"><span class="badge badge-ok">Yes</span></td><td class="mono">[[α,β],[−β,α]]</td></tr>
+                <tr><td class="mono">Θ′₁₂</td><td class="mono">2×1</td><td class="center" style="color:var(--muted2);">1</td><td class="center"><span class="badge badge-zero">No</span></td><td class="mono">0</td></tr>
+                <tr><td class="mono">Θ′₂₁</td><td class="mono">1×2</td><td class="center" style="color:var(--muted2);">1</td><td class="center"><span class="badge badge-zero">No</span></td><td class="mono">0</td></tr>
+                <tr><td class="mono">Θ′₂₂</td><td class="mono">1×1</td><td class="center" style="color:var(--accent);font-weight:700;">0</td><td class="center"><span class="badge badge-ok">Yes</span></td><td class="mono">γ (scalar)</td></tr>
+              </tbody>
+            </table>
+
+            <h3 style="margin-top:14px;">Numerical projection (b = 1.5)</h3>
+            <p style="font-size:12px;">Θ′₁₁ has λ=2 ≥ 1.5 → symmetrized. All other blocks λ &lt; 1.5 → unchanged.</p>
+            <div class="mat-eq" style="margin:10px 0;">
+              <span class="mat-label">Θ =</span>
+              <div class="mtx" id="mtx-before"></div>
+              <span style="font-size:18px;color:var(--accent);margin:0 4px;">→</span>
+              <span class="mat-label">W =</span>
+              <div class="mtx" id="mtx-after"></div>
+            </div>
+            <p style="font-size:11px;color:var(--muted);">α=(2+4)/2=3, β=(3+1)/2=2. Top-left 2×2 constrained; rest untouched.</p>
+            <div class="param-callout" style="margin-top:10px;">
+              <div style="font-size:11.5px;color:var(--muted);line-height:1.55;"><strong style="color:var(--text);">Both SVD and Schur yield the identical projection.</strong> Schur avoids forming L — cost <strong style="color:var(--accent);">O(d³)</strong> vs <span style="color:var(--muted2);text-decoration:line-through;">O(d⁶)</span>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──── TAB 4: 4D→4D ──── -->
+      <div class="stab-panel" id="st-ex-4x4">
+        <div class="cols2">
+          <div>
+            <h3>Setup: 4D input → 4D output</h3>
+            <p>Input and output Lie algebra representations share the same Schur block structure. The full Schur forms are:</p>
+            <div class="mat-eq" style="margin:10px 0;">
+              <span class="mat-label">Σ<sub>X</sub> = Σ<sub>Y</sub> =</span>
+              <div class="mtx" id="mtx-4x4-sig"></div>
+            </div>
+            <p style="font-size:12px;color:var(--muted);">Block-diagonal with two 2×2 blocks: S₁ = T₁ (Schur values a±ib) and S₂ = T₂ (Schur values c±id).</p>
+
+            <table class="block-tbl" style="margin-top:14px;">
+              <thead><tr><th>Block</th><th>Size</th><th class="center">Match?</th><th>Constraint</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">Θ′₁₁ (T₁,S₁)</td><td class="mono">2×2</td><td class="center"><span class="badge badge-ok">Yes</span></td><td>Both a±ib → <strong>[[α₁,β₁],[−β₁,α₁]]</strong></td></tr>
+                <tr><td class="mono">Θ′₁₂ (T₁,S₂)</td><td class="mono">2×2</td><td class="center"><span class="badge badge-zero">No</span></td><td>a±ib vs c±id → <strong>zero</strong></td></tr>
+                <tr><td class="mono">Θ′₂₁ (T₂,S₁)</td><td class="mono">2×2</td><td class="center"><span class="badge badge-zero">No</span></td><td>c±id vs a±ib → <strong>zero</strong></td></tr>
+                <tr><td class="mono">Θ′₂₂ (T₂,S₂)</td><td class="mono">2×2</td><td class="center"><span class="badge badge-ok">Yes</span></td><td>Both c±id → <strong>[[α₂,β₂],[−β₂,α₂]]</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3>Resulting Θ′ (4×4) — block diagonal</h3>
+            <svg viewBox="0 0 430 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:430px;height:auto;display:block;margin:6px 0;">
+              <text x="4" y="55" font-family="JetBrains Mono,monospace" font-size="11" fill="#6e6157">Θ′ =</text>
+              <text x="155" y="16" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d97757">S₁ (a±ib)</text>
+              <text x="315" y="16" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d97757">S₂ (c±id)</text>
+              <text x="46" y="66" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d97757">T₁</text>
+              <text x="46" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#a8998f">a±ib</text>
+              <text x="46" y="140" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d97757">T₂</text>
+              <text x="46" y="152" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#a8998f">c±id</text>
+              <rect x="68" y="28" width="174" height="68" rx="6" fill="rgba(217,119,87,.10)" stroke="rgba(217,119,87,.45)" stroke-width="1.5"></rect>
+              <text x="155" y="56" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">α₁    β₁</text>
+              <text x="155" y="72" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">−β₁   α₁</text>
+              <text x="155" y="90" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#d97757">T₁ ≃ S₁ → 2 free params</text>
+              <rect x="248" y="28" width="174" height="68" rx="6" fill="rgba(0,0,0,.025)" stroke="rgba(0,0,0,.10)" stroke-width="1" stroke-dasharray="5,3"></rect>
+              <text x="335" y="68" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="18" fill="#c8b8ad">0</text>
+              <text x="335" y="90" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#a8998f">forced zero</text>
+              <rect x="68" y="102" width="174" height="68" rx="6" fill="rgba(0,0,0,.025)" stroke="rgba(0,0,0,.10)" stroke-width="1" stroke-dasharray="5,3"></rect>
+              <text x="155" y="142" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="18" fill="#c8b8ad">0</text>
+              <text x="155" y="164" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#a8998f">forced zero</text>
+              <rect x="248" y="102" width="174" height="68" rx="6" fill="rgba(217,119,87,.10)" stroke="rgba(217,119,87,.45)" stroke-width="1.5"></rect>
+              <text x="335" y="130" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">α₂    β₂</text>
+              <text x="335" y="146" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#b05428">−β₂   α₂</text>
+              <text x="335" y="164" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="#d97757">T₂ ≃ S₂ → 2 free params</text>
+            </svg>
+
+            <div class="param-callout">
+              <span class="param-num">16</span>
+              <span class="param-arrow">→</span>
+              <span class="param-num">4</span>
+              <span class="param-desc">Dense 4×4 = 16 parameters. Block-diagonal equivariant form has only 4: (α₁, β₁, α₂, β₂).</span>
+            </div>
+
+            <h3 style="margin-top:14px;">Recovering W from Θ′</h3>
+            <p style="font-size:12px;color:var(--muted);line-height:1.6;">After constraining Θ′ to its equivariant form, recover the projected weight in the original basis:</p>
+            <div style="padding:8px 12px;border-radius:var(--rsm);background:var(--surf);border:1px solid var(--border);margin:8px 0;font-family:'JetBrains Mono',monospace;font-size:12.5px;text-align:center;line-height:2;">
+              <strong style="color:var(--accent);">W = U<sub>Y</sub> · Θ′ · U<sub>X</sub>ᵀ</strong>
+            </div>
+            <p style="font-size:11.5px;color:var(--muted);">U<sub>X</sub>, U<sub>Y</sub> are the orthogonal matrices from the Schur decomposition. This basis change is computed once; the resulting W is used directly in the forward pass.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
 <!-- ═══ DEMO ═══ -->
 <section id="demo">
   <div class="wrap">
@@ -438,14 +848,20 @@
       </p>
       <div class="demo-callout">
         <strong>Rows match exactly&nbsp;→ equivariant.&nbsp;&nbsp;Rows diverge&nbsp;→ symmetry broken.</strong>
-        The two backbones have independent sliders — compare how each architecture
-        responds to the same softness level.
+        Each model has an independent slider — compare how different architectures
+        respond to the same softness level.
       </div>
     </div>
 
-    <div class="demo-cols">
+    <!-- Demo Tabs -->
+    <div class="demo-tabs">
+      <button class="dtab active" data-demo="vit">Vision Transformer (ViT)</button>
+      <button class="dtab" data-demo="resnet">ResNet</button>
+      <button class="dtab" data-demo="dinov3">DINOv3</button>
+    </div>
 
-      <!-- ViT -->
+    <!-- ViT Panel -->
+    <div class="demo-panel active" id="panel-vit">
       <div class="demo-card">
         <div class="demo-card-head">
           <span class="demo-card-title">Vision Transformer (ViT)</span>
@@ -479,8 +895,10 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- ResNet -->
+    <!-- ResNet Panel -->
+    <div class="demo-panel" id="panel-resnet">
       <div class="demo-card">
         <div class="demo-card-head">
           <span class="demo-card-title">ResNet</span>
@@ -514,7 +932,42 @@
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- DINOv3 Panel -->
+    <div class="demo-panel" id="panel-dinov3">
+      <div class="demo-card">
+        <div class="demo-card-head">
+          <span class="demo-card-title">DINOv3-ViT</span>
+        </div>
+        <div class="gif-wrap" id="dinov3-wrap">
+          <img id="d0" src="notebooks/figs/dinov3_softness_0.0.gif" alt="DINOv3 s=0.0" class="active"/>
+          <img id="d1" src="notebooks/figs/dinov3_softness_0.2.gif" alt="DINOv3 s=0.2"/>
+          <img id="d2" src="notebooks/figs/dinov3_softness_0.6.gif" alt="DINOv3 s=0.6"/>
+          <img id="d3" src="notebooks/figs/dinov3_softness_1.0.gif" alt="DINOv3 s=1.0"/>
+        </div>
+        <div class="demo-card-body">
+          <p class="demo-cap">DINOv3 pretrained foundation model under 360° rotation. Patch embeddings and class tokens are projected via soft equivariant filters.</p>
+          <div class="mini-slider-wrap">
+            <div class="mini-top">
+              <span class="mini-lbl">Softness <em>b</em></span>
+              <span class="mini-val" id="dval">b = 0.0</span>
+            </div>
+            <div class="mini-track">
+              <div class="mini-track-bg"></div>
+              <div class="mini-track-fg" id="dtfg" style="width:0%"></div>
+              <input class="mini-input" id="ds" type="range" min="0" max="3" step="1" value="0"/>
+            </div>
+            <div class="mini-marks">
+              <span class="mini-mark on" id="dm0">0.0</span>
+              <span class="mini-mark" id="dm1">0.2</span>
+              <span class="mini-mark" id="dm2">0.6</span>
+              <span class="mini-mark" id="dm3">1.0</span>
+            </div>
+            <div class="mini-desc" id="ddesc"><strong>b = 0.0 —</strong> Strict equivariance. Feature rows match across all rotation angles; error map is uniformly black.</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -572,44 +1025,13 @@
             </div>
           </div>
 
-          <div class="carousel-slide" id="so3-slide-1">
-            <div class="sci-card">
-              <div class="sci-head">
-                <span class="sci-group">SO(3)</span>
-                <span class="sci-type">Equivariance — vector view</span>
-              </div>
-              <img src="notebooks/figs/output.gif"
-                   alt="SO(3) equivariance, vector divergence view"/>
-              <div class="sci-desc">
-                Complementary visualization of the same equivariance condition:
-                expected output <code>f<sub>b</sub>(x)</code> (dashed) vs.
-                actual <code>R<sup>−1</sup>f<sub>b</sub>(Rx)</code>.
-                The two traces collapse at b&nbsp;=&nbsp;0 and separate as b grows.
-              </div>
-            </div>
-            <div class="sci-card">
-              <div class="sci-head">
-                <span class="sci-group">SO(3)</span>
-                <span class="sci-type">End-to-end demo</span>
-              </div>
-              <img src="notebooks/figs/so3_demo_readme.gif"
-                   alt="SO(3) end-to-end demo"/>
-              <div class="sci-desc">
-                Full end-to-end SO(3) pipeline: Lie algebra generators → SVD-based projector →
-                <code>FilteredLinear</code> wrapping → soft interpolation. See
-                <code>notebooks/mlp_so3.ipynb</code>.
-              </div>
-            </div>
-          </div>
+          
 
         </div>
         <div class="carousel-nav">
-          <button class="carousel-btn" id="so3-prev" disabled>&#8592;</button>
           <div class="carousel-dots">
             <span class="cdot on" id="so3-dot-0"></span>
-            <span class="cdot" id="so3-dot-1"></span>
           </div>
-          <button class="carousel-btn" id="so3-next">&#8594;</button>
         </div>
       </div>
     </div>
@@ -752,7 +1174,113 @@
   makeSlider({ inputId:'vs', fgId:'vtfg', valId:'vval', descId:'vdesc', imgIds:['v0','v1','v2','v3'], markIds:['vm0','vm1','vm2','vm3'], descs:vitDescs });
   makeSlider({ inputId:'rs', fgId:'rtfg', valId:'rval', descId:'rdesc', imgIds:['r0','r1','r2','r3'], markIds:['rm0','rm1','rm2','rm3'], descs:rnDescs });
 
-  // Group tabs
+  var dinov3Descs = [
+    '<strong>b = 0.0 —</strong> Strict equivariance. Feature rows match across all rotation angles; error map is uniformly black (near-zero equivariance error).',
+    '<strong>b = 0.2 —</strong> Near-equivariant DINOv3. Retains rich foundation model semantics while maintaining approximate rotation invariance; bounded error.',
+    '<strong>b = 0.6 —</strong> Balanced trade-off. Unlocks more of the pretrained capacity; features begin to drift subtly under large rotations.',
+    '<strong>b = 1.0 —</strong> Original DINOv3 backbone. No symmetry constraint. Features respond naturally to absolute orientation (foundation model behavior).'
+  ];
+  makeSlider({ inputId:'ds', fgId:'dtfg', valId:'dval', descId:'ddesc', imgIds:['d0','d1','d2','d3'], markIds:['dm0','dm1','dm2','dm3'], descs:dinov3Descs });
+
+  // Demo tabs
+  document.querySelectorAll('.dtab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var target = this.getAttribute('data-demo');
+      document.querySelectorAll('.dtab').forEach(function(b) { b.classList.toggle('active', b === btn); });
+      document.querySelectorAll('.demo-panel').forEach(function(p) { p.classList.toggle('active', p.id === 'panel-' + target); });
+    });
+  });
+
+  // Schur section tabs
+  document.querySelectorAll('.stab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var target = this.dataset.st;
+      document.querySelectorAll('.stab').forEach(function(b) { b.classList.toggle('active', b.dataset.st === target); });
+      document.querySelectorAll('.stab-panel').forEach(function(p) { p.classList.toggle('active', p.id === 'st-' + target); });
+    });
+  });
+
+  // Matrix renderer
+  function renderMtx(id, data, opts) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var rows = data.length, cols = data[0].length;
+    el.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    if (opts && opts.sm) el.classList.add('mtx-sm');
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var v = data[r][c];
+        var span = document.createElement('span');
+        var str = String(v);
+        span.textContent = str;
+        var cls = [];
+        if (v === 0 || str === '0') cls.push('z');
+        else if (typeof v === 'number' && v < 0) cls.push('neg');
+        else if (typeof v === 'string' && (str.charAt(0) === '\u2212' || str.charAt(0) === '-')) cls.push('neg');
+        else if (typeof v === 'string' && /^[\u03B1-\u03C9\u0393-\u03A9]/.test(str)) cls.push('p');
+        if (opts && opts.hl) {
+          var key = r + ',' + c;
+          if (opts.hl[key]) cls.push(opts.hl[key]);
+        }
+        if (cls.length) span.className = cls.join(' ');
+        el.appendChild(span);
+      }
+    }
+  }
+
+  // Populate all matrices
+  renderMtx('mtx-az', [[0,-1,0],[1,0,0],[0,0,0]]);
+  renderMtx('mtx-L', [
+    [0,1,0,1,0,0,0,0,0],[-1,0,0,0,1,0,0,0,0],[0,0,0,0,0,1,0,0,0],
+    [-1,0,0,0,1,0,0,0,0],[0,-1,0,-1,0,0,0,0,0],[0,0,-1,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,-1,0,0],[0,0,0,0,0,0,0,0,0]
+  ], {sm:true});
+  renderMtx('mtx-weq', [['\u03B1','\u03B2','0'],['\u2212\u03B2','\u03B1','0'],['0','0','\u03B3']]);
+  renderMtx('mtx-s1', [[0,-1],[1,0]]);
+  renderMtx('mtx-s2', [['0']]);
+  renderMtx('mtx-before', [[2,3,1],[-1,4,2],[3,-1,5]]);
+  renderMtx('mtx-after', [[3,2,1],[-2,3,2],[3,-1,5]], {hl:{'0,0':'hi','0,1':'hi','1,0':'hi','1,1':'hi'}});
+
+  // Basis matrices V1-V7
+  (function(){
+    var bases = [
+      {l:'V\u2081 (\u03C3=0)',d:[[1,0,0],[0,1,0],[0,0,0]]},
+      {l:'V\u2082 (\u03C3=0)',d:[[0,1,0],[-1,0,0],[0,0,0]]},
+      {l:'V\u2083 (\u03C3=0)',d:[[0,0,0],[0,0,0],[0,0,1]]},
+      {l:'V\u2084 (\u03C3=1)',d:[[0,0,1],[0,0,0],[0,0,0]]},
+      {l:'V\u2085 (\u03C3=1)',d:[[0,0,0],[0,0,1],[0,0,0]]},
+      {l:'V\u2086 (\u03C3=1)',d:[[0,0,0],[0,0,0],[1,0,0]]},
+      {l:'V\u2087 (\u03C3=1)',d:[[0,0,0],[0,0,0],[0,1,0]]}
+    ];
+    var grid = document.getElementById('basis-grid');
+    if (!grid) return;
+    bases.forEach(function(b){
+      var item = document.createElement('div');
+      item.className = 'basis-item';
+      var lbl = document.createElement('div');
+      lbl.className = 'basis-lbl';
+      lbl.textContent = b.l;
+      item.appendChild(lbl);
+      var mtx = document.createElement('div');
+      mtx.className = 'mtx';
+      mtx.style.gridTemplateColumns = 'repeat(3,1fr)';
+      b.d.flat().forEach(function(v){
+        var sp = document.createElement('span');
+        sp.textContent = v;
+        if (v === 0) sp.className = 'z';
+        else if (v < 0) sp.className = 'neg';
+        mtx.appendChild(sp);
+      });
+      item.appendChild(mtx);
+      grid.appendChild(item);
+    });
+  })();
+
+
+  // 4D->4D example: full Sigma matrix
+  renderMtx('mtx-4x4-sig', [['a','b','0','0'],['\u2212b','a','0','0'],['0','0','c','d'],['0','0','\u2212d','c']]);
+
+    // Group tabs
   document.querySelectorAll('.gtab').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var g = this.dataset.group;
@@ -763,18 +1291,16 @@
 
   // SO(3) carousel
   var so3Idx = 0;
-  var so3Total = 2;
+  var so3Total = 1;
   function so3Go(idx) {
     so3Idx = idx;
     for (var i = 0; i < so3Total; i++) {
-      document.getElementById('so3-slide-' + i).classList.toggle('active', i === idx);
-      document.getElementById('so3-dot-' + i).classList.toggle('on', i === idx);
+      var slide = document.getElementById('so3-slide-' + i);
+      if (slide) slide.classList.toggle('active', i === idx);
+      var dot = document.getElementById('so3-dot-' + i);
+      if (dot) dot.classList.toggle('on', i === idx);
     }
-    document.getElementById('so3-prev').disabled = idx === 0;
-    document.getElementById('so3-next').disabled = idx === so3Total - 1;
   }
-  document.getElementById('so3-prev').addEventListener('click', function () { if (so3Idx > 0) so3Go(so3Idx - 1); });
-  document.getElementById('so3-next').addEventListener('click', function () { if (so3Idx < so3Total - 1) so3Go(so3Idx + 1); });
   so3Go(0);
 })();
 </script>
