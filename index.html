@@ -85,7 +85,7 @@
     p { color: var(--muted); font-size: 15px; line-height: 1.72; }
     p + p { margin-top: 12px; }
     strong { color: var(--text); font-weight: 600; }
-    code { font-family: 'JetBrains Mono', monospace; font-size: .875em; color: var(--accent2); background: rgba(185,80,40,.10); padding: 2px 5px; border-radius: 4px; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: .875em; color: var(--accent); background: rgba(255,255,255,.03); padding: 2px 5px; border-radius: 4px; }
     .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
     @media (max-width: 760px) { .cols2 { grid-template-columns: 1fr; gap: 28px; } }
     .kpis { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
@@ -194,6 +194,7 @@
     .codeblock { border: 1px solid rgba(0,0,0,.18); border-radius: var(--r); background: var(--code-bg); overflow: hidden; margin-top: 20px; }
     .codeblock-head { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px; border-bottom: 1px solid rgba(255,255,255,.08); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,.38); background: rgba(255,255,255,.03); }
     .codeblock pre { margin: 0; padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.65; color: rgba(255,255,255,.82); }
+    .codeblock pre code { background: transparent; color: rgba(255,255,255,.92); }
 
     /* citation */
     .cite-block { border: 1px solid rgba(0,0,0,.18); border-radius: var(--r); background: var(--code-bg); overflow: hidden; margin-top: 20px; }
@@ -494,7 +495,7 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
         </div>
 
         <!-- Schur filter teaser — full section below -->
-        <div style="margin-top:14px;padding:12px 16px;border-radius:var(--rsm);border:1px solid rgba(217,119,87,.25);background:rgba(217,119,87,.06);">
+        <!-- <div style="margin-top:14px;padding:12px 16px;border-radius:var(--rsm);border:1px solid rgba(217,119,87,.25);background:rgba(217,119,87,.06);">
           <p style="font-size:13px;margin:0;line-height:1.6;">
             <strong style="color:var(--accent);">Fast Schur filter</strong> —
             reduces construction cost from O((dd′)³) to O(max(d,d′)³) by exploiting
@@ -502,25 +503,25 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
             representations (e.g. O(5) T(4), d = 625).
             <a href="#schur" style="color:var(--accent);text-decoration:underline;font-weight:600;">See worked examples below ↓</a>
           </p>
-        </div>
+        </div> -->
 
       </div>
 
       <div>
-                <p>The same recipe applies across architectures and groups:</p>
+        <p>The same recipe applies across architectures and groups:</p>
         <div class="steps">
           <div class="step">
             <div class="step-num">1</div>
             <div class="step-body">
               <div class="step-title">Load pretrained backbone</div>
-              <div class="step-desc">ViT, ResNet, DINOv2, SegFormer, equivariant MLP — any model with Conv2d or Linear layers.</div>
+              <div class="step-desc">ViT, ResNet, DINOv2, SegFormer, GNN or MLP </div>
             </div>
           </div>
           <div class="step">
             <div class="step-num">2</div>
             <div class="step-body">
               <div class="step-title">Wrap target layers</div>
-              <div class="step-desc">Wrap target modules with soft equivariant filters (<code>FilteredConv2d</code>, <code>FilteredLinear</code>). Projectors are computed once from the group structure.</div>
+              <div class="step-desc">Wrap target modules with soft equivariant filters (see code <code>FilteredConv2d</code>, <code>FilteredLinear</code>). Projectors are computed once from the group structure.</div>
             </div>
           </div>
           <div class="step">
@@ -536,7 +537,6 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
     </div>
   </div>
 </section>
-
 <!-- ═══ SCHUR ═══ -->
 <section id="schur">
   <div class="wrap">
@@ -651,13 +651,14 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
                 <p>Θ′<sub>lk</sub> = <strong>0</strong> — forced to zero. No free parameters.</p>
               </div>
               <div class="schur-case" style="margin-top:8px;">
-                <div class="schur-case-title"><span class="badge badge-ok">T<sub>l</sub> ≃ S<sub>k</sub></span> Matching Schur values</div>
-                <p>Θ′<sub>lk</sub> takes a constrained rotation form — 2 free parameters (α, β) per matching 2×2 pair, or 1 (γ) per matching 1×1.</p>
+                <div class="schur-case-title"><span class="badge badge-ok"> T<sub>l</sub> ≃ S<sub>k</sub></span> Matching Schur values</div>
+                <p>Θ′<sub>lk</sub> takes a constrained rotation form — 2 free parameters (α, β) per matching 2×2 pair, or 1 parameter (γ) per matching 1×1.</p>
               </div>
             </div>
 
-            <h3 style="margin-top:12px;">Soft thresholding</h3>
-            <p>Blocks with λ<sub>T<sub>l</sub></sub> + λ<sub>S<sub>k</sub></sub> &gt; b are projected to their equivariant form. Blocks below <strong>b</strong> remain unconstrained — equivalent to the SVD approach but computed block-by-block.</p>
+            <h3 style="margin-top:12px;">Soft Projection</h3>
+            <p>For Blocks with λ<sub>T<sub>l</sub></sub> + λ<sub>S<sub>k</sub></sub> &gt; : Schur lemma is followed strictly. 
+            Blocks below <strong>b</strong> remain unconstrained — equivalent to the SVD approach but computed block-by-block.</p>
           </div>
           <div>
             <h3>Block structure visualization</h3>
@@ -841,10 +842,10 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
     <div class="demo-blurb">
       <p>
         Each animation sweeps the input image through a full 360° rotation.
-        The top row shows <code>f<sub>b</sub>(R<sub>θ</sub>x)</code> — features of the
-        <em>rotated</em> input. The bottom row shows <code>R<sub>θ</sub><sup>−1</sup>f<sub>b</sub>(x)</code>
-        — the inverse rotation applied to features of the <em>original</em> input.
-        The bottom-left error map shows their discrepancy.
+        The top row shows <code>f<sub>b</sub>(x)</code> — features of the
+        input <code>x</code>. The bottom row shows <code>R<sub>θ</sub><sup>−1</sup>f<sub>b</sub>(R<sub>θ</sub>x)</code>
+        — the inverse rotation applied to features of the <em>rotated</em> input.
+        The bottom-left error map shows their mean discrepancy.
       </p>
       <div class="demo-callout">
         <strong>Rows match exactly&nbsp;→ equivariant.&nbsp;&nbsp;Rows diverge&nbsp;→ symmetry broken.</strong>
@@ -873,8 +874,7 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
           <img id="v3" src="notebooks/figs/vit_softness_1.0.gif" alt="ViT s=1.0"/>
         </div>
         <div class="demo-card-body">
-          <p class="demo-cap">Final-layer feature maps under a continuous 360° rotation test.
-          Patch projection and positional embeddings are projected via the Schur filter.</p>
+          <p class="demo-cap">Final-layer feature maps under 90° rotation.</p>
           <div class="mini-slider-wrap">
             <div class="mini-top">
               <span class="mini-lbl">Softness <em>b</em></span>
@@ -910,8 +910,7 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
           <img id="r3" src="notebooks/figs/resnet_softness_1.0.gif" alt="ResNet s=1.0"/>
         </div>
         <div class="demo-card-body">
-          <p class="demo-cap">Final-layer feature maps under the same 360° rotation test.
-          All convolutional layers are projected; 1×1 skip connections are left unchanged.</p>
+          <p class="demo-cap">Final-layer feature maps under 90° rotation.</p>
           <div class="mini-slider-wrap">
             <div class="mini-top">
               <span class="mini-lbl">Softness <em>b</em></span>
@@ -947,7 +946,7 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
           <img id="d3" src="notebooks/figs/dinov3_softness_1.0.gif" alt="DINOv3 s=1.0"/>
         </div>
         <div class="demo-card-body">
-          <p class="demo-cap">DINOv3 pretrained foundation model under 360° rotation. Patch embeddings and class tokens are projected via soft equivariant filters.</p>
+          <p class="demo-cap">Final-layer feature maps under 90° rotation.</p>
           <div class="mini-slider-wrap">
             <div class="mini-top">
               <span class="mini-lbl">Softness <em>b</em></span>
@@ -976,13 +975,9 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
 <section id="groups">
   <div class="wrap">
     <div class="sec-label">Beyond 2D</div>
-    <h2>Scientific groups: SO(3) and O(5)</h2>
+    <h2>Examples: SO(3) and O(5)</h2>
     <p style="margin-bottom:24px;">
-      The weight projection framework extends naturally to equivariant MLPs for scientific computing.
-      Swapping in the group-specific Lie algebra generators (or forward differences for discrete groups)
-      is all that changes — the interpolation and error guarantee are identical.
-      Both animations sweep rotation angles; the error distributions confirm that
-      <strong>equivariance is exact at b&nbsp;=&nbsp;0 and degrades monotonically as b increases</strong>.
+      The weight projection framework extends naturally to equivariant MLPs for scientific computing. Swapping in the group-specific Lie algebra generators (or forward differences for discrete groups) is all that changes.
     </p>
 
     <div class="group-tabs">
@@ -1047,9 +1042,9 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
           <img src="notebooks/figs/o5_equivariant_err.gif"
                alt="O(5) equivariance error distribution across softness values"/>
           <div class="sci-desc">
-            The O(5) equivariant projector is constructed from the 5×5 orthogonal group's
+            The O(5) equivariant projector is constructed from the group's
             Lie algebra generators. Error distribution is concentrated at zero when b&nbsp;=&nbsp;0
-            and spreads as b increases — confirming the guarantee holds in higher dimensions.
+            and spreads as b increases — confirming the controlability holds in higher dimensions.
           </div>
         </div>
         <div class="sci-card">
@@ -1061,8 +1056,7 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
                alt="O(5) invariance error distribution across softness values"/>
           <div class="sci-desc">
             Invariance error for O(5) scalar outputs. The monotonic broadening of the error
-            distribution as b increases mirrors the SO(3) case, validating
-            the generality of the projection framework across groups and dimensions.
+            distribution as b increases validates the generality of the projection framework across groups and dimensions.
           </div>
         </div>
       </div>
@@ -1083,15 +1077,26 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
         <span>Python</span>
         <span>github.com/ashiq24/soft-equivariance</span>
       </div>
-      <pre><code>from standalone.vit_soft_equivariance_standalone import monkeypatch_vitembeddings
-    from standalone.resnet_soft_equivariance_standalone import convert_cnn_to_filtered
+      <div class="codeblock-body" style="position:relative;">
+        <button class="copy-btn" data-target="quickstart-code" aria-label="Copy code" style="position:absolute;top:10px;right:10px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);color:rgba(255,255,255,.9);cursor:pointer;font-size:12px;">Copy</button>
+        <pre id="quickstart-code"><code class="language-python">from standalone.vit_soft_equivariance_standalone import monkeypatch_vitembeddings
+from standalone.resnet_soft_equivariance_standalone import convert_cnn_to_filtered
 
-    filter_config = {"n_rotations": 4, "soft_thresholding": 0.2,
-             "soft_thresholding_pos": 0.2, "group_type": "rotation"}
-    monkeypatch_vitembeddings(model.vit.embeddings, filter_config)
-    # For CNNs: convert_cnn_to_filtered(model, filter_config)</code></pre>
+filter_config = {
+  "n_rotations": 4,
+  "soft_thresholding": 0.2,
+  "soft_thresholding_pos": 0.2,
+  "group_type": "rotation",
+}
+
+# For ViT embeddings
+monkeypatch_vitembeddings(model.vit.embeddings, filter_config)
+
+# For CNNs
+# convert_cnn_to_filtered(model, filter_config)
+</code></pre>
+      </div>
     </div>
-
     <p style="margin-top:16px;">
       Standalone single-file demos are in <code>standalone/</code>.
       Group-specific notebooks with full derivations are in <code>notebooks/</code>.
@@ -1170,6 +1175,27 @@ y       =  <span class="kw">W_b</span> · x                  <span class="c">out
     inp.addEventListener('input', function () { activate(parseInt(this.value, 10)); });
     activate(0);
   }
+
+  // copy-code button behavior
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var tid = btn.getAttribute('data-target');
+      var pre = document.getElementById(tid);
+      if (!pre) return;
+      var text = pre.innerText || pre.textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){
+          var old = btn.textContent;
+          btn.textContent = 'Copied';
+          setTimeout(function(){ btn.textContent = old; }, 1200);
+        });
+      } else {
+        // fallback
+        var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e){} document.body.removeChild(ta);
+        var old = btn.textContent; btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = old; }, 1200);
+      }
+    });
+  });
 
   makeSlider({ inputId:'vs', fgId:'vtfg', valId:'vval', descId:'vdesc', imgIds:['v0','v1','v2','v3'], markIds:['vm0','vm1','vm2','vm3'], descs:vitDescs });
   makeSlider({ inputId:'rs', fgId:'rtfg', valId:'rval', descId:'rdesc', imgIds:['r0','r1','r2','r3'], markIds:['rm0','rm1','rm2','rm3'], descs:rnDescs });
