@@ -1,7 +1,7 @@
 # Tunable Soft Equivariance with Guarantee (CVPR 2026)
 
 
-[![Paper](https://img.shields.io/badge/Paper-CVPR%202026-blue)](https://arxiv.org/pdf/2603.26657)
+[![Paper](https://img.shields.io/badge/Paper-CVPR%202026-blue)](https://arxiv.org/pdf/2603.26657) [![Website](https://img.shields.io/badge/Page-Softeq-orange)](https://ashiq24.github.io/soft-equivariance/) 
 
 ![Soft equivariance overview](notebooks/figs/soft_eq_fig.png)
 
