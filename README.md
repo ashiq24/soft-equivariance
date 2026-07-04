@@ -1,4 +1,4 @@
-# Tunable Soft Equivariance with Guarantee (CVPR 2026)
+# Tunable Soft Equivariance with Guarantees (CVPR 2026)
 
 
 [![Paper](https://img.shields.io/badge/Paper-CVPR%202026-blue)](https://arxiv.org/pdf/2603.26657)
@@ -6,7 +6,7 @@
 ![Soft equivariance overview](notebooks/figs/soft_eq_fig.png)
 
 ## Overview
-This repository contains the official code for **Tunable Soft Equivariance with Guarantee (CVPR 2026)**.
+This repository contains the official code for **Tunable Soft Equivariance with Guarantees (CVPR 2026)**.
 We introduce *soft equivariance*: a simple mechanism that **continuously interpolates** between strict group equivariance and the original (pretrained) model, controlled by a single softness parameter.
 
 The implementation is designed for practical use in modern vision stacks (such as ViT / ResNet / DINOv2 / SegFormer) and scientific settings (equivariant MLPs for O(5) and Lorentz groups), with lightweight tooling for training and evaluating robustness/consistency under group actions. 
