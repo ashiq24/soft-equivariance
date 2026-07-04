@@ -202,7 +202,7 @@ We gratefully acknowledge the open-source projects that made this work possible:
 ```bibtex
 @InProceedings{rahman2026tunable,
 	author    = {Rahman, Md Ashiqur and Hao, Lim Jun and Jiang, Jeremiah and Lim, Teck-Yian and Yeh, Raymond A},
-	title     = {Tunable Soft Equivariance with Guarantee},
+	title     = {Tunable Soft Equivariance with Guarantees},
 	booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
 	year      = {2026}
 }
