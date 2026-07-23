@@ -55,7 +55,7 @@ print(f"Shape of backbone features: {features.last_hidden_state.shape}")
 
 
 ## Quick start
-At a high level, **soft equivariance** is implemented by *filtering (projecting) pretrained weights to suitable subspaces at forward time*. The degree of equivariance is controlled by a parameter named **softness** (ranging from 0.0 to 1.0), where 0.0 corresponds to strict equivariance and 1.0 corresponds to the original weights (unconstrained).
+At a high level, **soft (approximate) equivariance** is implemented by *filtering (projecting) pretrained weights to suitable subspaces at forward time*. The degree of equivariance is controlled by a parameter named **softness** (ranging from 0.0 to 1.0), where 0.0 corresponds to strict equivariance and 1.0 corresponds to the original weights (unconstrained).
 
 For Linear layers/convolutional kernels (or patch projections), we wrap the original layer and apply an invariant/equivariant projector before using the weights. 
 
