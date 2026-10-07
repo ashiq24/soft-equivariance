@@ -2,7 +2,7 @@
 
 
 [![Paper](https://img.shields.io/badge/Paper-CVPR%202026-blue)](https://arxiv.org/pdf/2603.26657) [![Website](https://img.shields.io/badge/Page-Softeq-orange)](https://ashiq24.github.io/soft-equivariance/) 
-
+[![YouTube](https://img.shields.io/badge/YouTube-Video-red?logo=youtube)](https://youtu.be/l9ATXk2M8rE?si=EOm8I62kA-KhKYF5)
 ![Soft equivariance overview](notebooks/figs/soft_eq_fig.png)
 
 
